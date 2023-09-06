@@ -1,0 +1,213 @@
+// SPDX-License-Identifier: GPL-2.0
+/**
+ * Microtips integrated OLDI panel and touch DT overlay for AM625 - SK
+ *
+ * Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+ #include "k3-pinctrl.h"
+
+/ {
+	fragment@101 {
+		target-path = "/";
+
+		__overlay__ {
+			display {
+				compatible = "myir,7-inch-lvds";
+
+				/*
+				* Note that the OLDI TX 0 transmits the odd set of pixels
+				* while the OLDI TX 1 transmits the even set. This is a
+				* fixed configuration in the IP integration and is not
+				* changeable. The properties, "dual-lvds-odd-pixels" and
+				* "dual-lvds-even-pixels" have been used to merely
+				* identify if a Dual Link configuration is required.
+				* Swapping them will not make any difference.
+				*/
+				port@0 {	
+					
+					lcd_in0: endpoint {
+						remote-endpoint = <&oldi_out0>;
+					};
+				};
+
+				port@1 {
+					
+					lcd_in1: endpoint {
+						remote-endpoint = <&oldi_out1>;
+					};
+				};
+			};
+
+			backlight_lvds: backlight-lvds {
+				compatible = "pwm-backlight";
+				pwms = <&epwm1 0 100000 0>;
+				brightness-levels = < 0  1  2  3  4  5  6  7  8  9
+									10 11 12 13 14 15 16 17 18 19
+									20 21 22 23 24 25 26 27 28 29
+									30 31 32 33 34 35 36 37 38 39
+									40 41 42 43 44 45 46 47 48 49
+									50 51 52 53 54 55 56 57 58 59
+									60 61 62 63 64 65 66 67 68 69
+									70 71 72 73 74 75 76 77 78 79
+									80 81 82 83 84 85 86 87 88 89
+									90 91 92 93 94 95 96 97 98 99
+									100>;
+				default-brightness-level = <80>;
+			};
+		};
+	};
+};
+
+&main_pmx0 {
+	main_oldi0_pins_default: main-oldi0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x0260, PIN_OUTPUT, 0) /* (AA5) OLDI0_A0N */
+			AM62X_IOPAD(0x025c, PIN_OUTPUT, 0) /* (Y6) OLDI0_A0P */
+			AM62X_IOPAD(0x0268, PIN_OUTPUT, 0) /* (AD3) OLDI0_A1N */
+			AM62X_IOPAD(0x0264, PIN_OUTPUT, 0) /* (AB4) OLDI0_A1P */
+			AM62X_IOPAD(0x0270, PIN_OUTPUT, 0) /* (Y8) OLDI0_A2N */
+			AM62X_IOPAD(0x026c, PIN_OUTPUT, 0) /* (AA8) OLDI0_A2P */
+			AM62X_IOPAD(0x0278, PIN_OUTPUT, 0) /* (AB6) OLDI0_A3N */
+			AM62X_IOPAD(0x0274, PIN_OUTPUT, 0) /* (AA7) OLDI0_A3P */
+			AM62X_IOPAD(0x0280, PIN_OUTPUT, 0) /* (AC6) OLDI0_A4N */
+			AM62X_IOPAD(0x027c, PIN_OUTPUT, 0) /* (AC5) OLDI0_A4P */
+			AM62X_IOPAD(0x0288, PIN_OUTPUT, 0) /* (AE5) OLDI0_A5N */
+			AM62X_IOPAD(0x0284, PIN_OUTPUT, 0) /* (AD6) OLDI0_A5P */
+			AM62X_IOPAD(0x0290, PIN_OUTPUT, 0) /* (AE6) OLDI0_A6N */
+			AM62X_IOPAD(0x028c, PIN_OUTPUT, 0) /* (AD7) OLDI0_A6P */
+			AM62X_IOPAD(0x0298, PIN_OUTPUT, 0) /* (AD8) OLDI0_A7N */
+			AM62X_IOPAD(0x0294, PIN_OUTPUT, 0) /* (AE7) OLDI0_A7P */
+			AM62X_IOPAD(0x02a0, PIN_OUTPUT, 0) /* (AD4) OLDI0_CLK0N */
+			AM62X_IOPAD(0x029c, PIN_OUTPUT, 0) /* (AE3) OLDI0_CLK0P */
+			AM62X_IOPAD(0x02a8, PIN_OUTPUT, 0) /* (AE4) OLDI0_CLK1N */
+			AM62X_IOPAD(0x02a4, PIN_OUTPUT, 0) /* (AD5) OLDI0_CLK1P */
+		>;
+	};
+
+	main_lvds0_tpcs_pins_default: main-lvds0-tpcs-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01c0, PIN_OUTPUT, 7) /* (B13) SPI0_D0.GPIO1_18 */
+			/* AM62X_IOPAD(0x007c, PIN_INPUT, 7)  (P25) GPMC0_CLK.GPIO0_31 */
+			AM62X_IOPAD(0x0098, PIN_INPUT, 7) /* (U23) GPMC0_WAIT0.GPIO0_37 */
+		>;
+	};
+
+	main_lvds1_tpcs_pins_default: main-lvds1-tpcs-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01c4, PIN_OUTPUT, 7) /* (B14) SPI0_D1.GPIO1_19 */
+			AM62X_IOPAD(0x00a4, PIN_INPUT, 7) /* (M22) GPMC0_CLK.GPIO0_40*/
+		>;
+	};
+
+	main_epwm0_lvds0_pins_default: main-epwm0-lvds0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01b8, PIN_OUTPUT, 7) /* (C13) SPI0_CS1.EHRPWM0_B */
+		>;
+	};
+	
+	main_epwm0_lvds1_pins_default: main-epwm0-lvds1-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01b4, PIN_OUTPUT, 7) /* (A13) SPI0_CS0.EHRPWM0_A */
+		>;
+	};
+
+	main_lvds_dual_epwm1_pins_default: main-lvds-dual-epwm1-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01bc, PIN_OUTPUT, 2) /* (A14) SPI0_CLK.EHRPWM1_A */
+		>;
+	};
+};
+
+&main_gpio0 {
+	pinctrl-names ="default";
+	pinctrl-0=<
+				&main_uart4_rst_pins_default
+				&main_uart6_rst_pins_default
+				&main_epwm0_lvds0_pins_default
+				&main_epwm0_lvds1_pins_default>;
+	status = "okay";
+};
+
+&dss {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_oldi0_pins_default &main_dss0_pins_default>;
+	status = "okay";
+};
+
+&dss_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* VP1: LVDS Output (OLDI TX 0) */
+	port@0 {
+		reg = <0>;
+		oldi_out0: endpoint {
+			remote-endpoint = <&lcd_in0>;
+		};
+	};
+
+	/* VP1: LVDS Output (OLDI TX 1) */
+	port@2 {
+		reg = <2>;
+		oldi_out1: endpoint {
+			remote-endpoint = <&lcd_in1>;
+		};
+	};
+};
+
+// &epwm0 {
+// 	pinctrl-names = "default";
+// 	pinctrl-0 = <&main_epwm0_b_pins_default>;
+// 	status = "okay";
+// };
+
+&epwm1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_lvds_dual_epwm1_pins_default>;
+	status = "okay";
+};
+
+&main_i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	edt-ft5x06@38 {
+		compatible = "edt,edt-ft5406";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&main_lvds0_tpcs_pins_default>;
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <37 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios = <&main_gpio1 18 GPIO_ACTIVE_LOW>;
+		// wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
+		touchscreen-size-x=<1024>;
+		touchscreen-size-y=<600>;
+		status = "okay";
+	};
+};
+
+&main_i2c3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	edt-ft5x06-1@38 {
+		compatible = "edt,edt-ft5406";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&main_lvds1_tpcs_pins_default>;
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <40 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios = <&main_gpio1 19 GPIO_ACTIVE_LOW>;
+		// wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
+		touchscreen-size-x=<1024>;
+		touchscreen-size-y=<600>;
+		status = "okay";
+	};
+};
