@@ -47,6 +47,11 @@ config GPIOLIB_IRQCHIP
 	select IRQ_DOMAIN
 	bool
 
+config GPIO_AT9555
+       tristate "AT9555 GPIO support"
+    help
+    Say yes here to support AT9555 GPIO controller.
+
 config DEBUG_GPIO
 	bool "Debug GPIO calls"
 	depends on DEBUG_KERNEL
