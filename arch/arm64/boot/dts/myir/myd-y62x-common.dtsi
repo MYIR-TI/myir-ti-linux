@@ -867,7 +867,10 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	usb-role-switch;
-
+	dr_mode = "otg";
+	role-switch-default-mode = "host";
+	status = "okay";
+	
 	port {
 		usbotg_hs_ep: endpoint {
 			remote-endpoint = <&con_usbotg_hs_ep>;
