@@ -254,8 +254,8 @@
 		compatible = "gpio-leds";
 
 		led-user {
-			label = "am62-sk:blue:heartbeat";
-			gpios = <&at9555 4 GPIO_ACTIVE_HIGH>;
+			label = "am62-sk:d54";
+			gpios = <&at9555 4 GPIO_ACTIVE_LOW>;
 			max-brightness = <255>;
 			linux,default-trigger = "heartbeat";
 			function = LED_FUNCTION_HEARTBEAT;
@@ -263,10 +263,10 @@
 		};
 
 		led-sys {
-			label = "am62-sk:blue:heartbeat";
+			label = "am62-sk:d53";
 			pinctrl-names = "default";
 			pinctrl-1 = <&mcu_run_led_pins_default>;
-			gpios = <&mcu_gpio0 16 GPIO_ACTIVE_HIGH>;
+			gpios = <&mcu_gpio0 16 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "heartbeat";
 			function = LED_FUNCTION_HEARTBEAT;
 			default-state = "on";
