@@ -191,6 +191,16 @@
 		gpios = <&mcu_gpio0 4 GPIO_ACTIVE_HIGH>;
 	};
 
+	csi1_io: csi1-io {
+		compatible = "regulator-fixed";
+		regulator-name = "csi1_pwr";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&mcu_gpio0 3 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
 	hdmi_mstrclk: hdmi-mstrclk {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -926,6 +936,14 @@
 		clock-lanes = <0>;
 		data-lanes = <1 2>;
 	};
+};
+
+&ti_csi2rx0 {
+        status = "okay";
+};
+
+&dphy0 {
+        status = "okay";
 };
 
 &dss {
