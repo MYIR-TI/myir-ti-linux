@@ -10,12 +10,15 @@
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/net/ti-dp83867.h>
-#include "myd-y62x.dtsi"
 #include "myd-y62x-common.dtsi"
 
 / {
 //6252 shut down two watchdog
-
+	cpus {
+		/delete-node/ cpu-map;
+		/delete-node/ cpu@2;
+		/delete-node/ cpu@3;
+	};
 };
 &main_rti2{
 	status = "disabled";

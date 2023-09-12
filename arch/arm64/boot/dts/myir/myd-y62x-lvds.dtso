@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
-/**
- * Microtips integrated OLDI panel and touch DT overlay for AM625 - SK
- *
- * Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * ALINX AN5641 & Digilent PCam 5C - OV5640 camera module
+ * Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
  */
+
 
 /dts-v1/;
 /plugin/;
@@ -11,25 +12,43 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 
- #include "k3-pinctrl.h"
+#include "k3-pinctrl.h"
 
-/ {
-	fragment@101 {
-		target-path = "/";
+&{/} {
 
-		__overlay__ {
-			display {
+
+  panel: panel-lvds0 {
+    compatible = "panel-simple";
+    backlight = <&backlight_lvds>;
+    status = "okay";
+		width-mm = <154>;
+		height-mm = <85>;
+    data-mapping = "vesa-24";
+		panel-timing {
+				clock-frequency = <38000000>;
+				hactive = <1024>;
+				hfront-porch = <88>;
+				hsync-len = <6>;
+				hback-porch = <176>;
+				 
+				vactive = <600>;
+				vfront-porch = <25>; 
+				vsync-len = <5>;
+				vback-porch = <20>;
+				
+				
+	  };
+
+    port {
+        lcd_in0: endpoint {
+            remote-endpoint = <&oldi_out0>;
+        };
+    };
+	};
+
+/*
+		display {
 				compatible = "myir,7-inch-lvds";
-
-				/*
-				* Note that the OLDI TX 0 transmits the odd set of pixels
-				* while the OLDI TX 1 transmits the even set. This is a
-				* fixed configuration in the IP integration and is not
-				* changeable. The properties, "dual-lvds-odd-pixels" and
-				* "dual-lvds-even-pixels" have been used to merely
-				* identify if a Dual Link configuration is required.
-				* Swapping them will not make any difference.
-				*/
 				port@0 {	
 					
 					lcd_in0: endpoint {
@@ -44,7 +63,7 @@
 					};
 				};
 			};
-
+*/
 			backlight_lvds: backlight-lvds {
 				compatible = "pwm-backlight";
 				pwms = <&epwm1 0 100000 0>;
@@ -61,8 +80,7 @@
 									100>;
 				default-brightness-level = <80>;
 			};
-		};
-	};
+	
 };
 
 &main_pmx0 {
@@ -94,7 +112,6 @@
 	main_lvds0_tpcs_pins_default: main-lvds0-tpcs-pins-default {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x01c0, PIN_OUTPUT, 7) /* (B13) SPI0_D0.GPIO1_18 */
-			/* AM62X_IOPAD(0x007c, PIN_INPUT, 7)  (P25) GPMC0_CLK.GPIO0_31 */
 			AM62X_IOPAD(0x0098, PIN_INPUT, 7) /* (U23) GPMC0_WAIT0.GPIO0_37 */
 		>;
 	};
@@ -106,34 +123,22 @@
 		>;
 	};
 
-	main_epwm0_lvds0_pins_default: main-epwm0-lvds0-pins-default {
+	epwm0_pins_default: epwm0-pins-default {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x01b8, PIN_OUTPUT, 7) /* (C13) SPI0_CS1.EHRPWM0_B */
 		>;
 	};
 	
-	main_epwm0_lvds1_pins_default: main-epwm0-lvds1-pins-default {
+	epwm1_pins_default: epwm1-pins-default {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x01b4, PIN_OUTPUT, 7) /* (A13) SPI0_CS0.EHRPWM0_A */
 		>;
 	};
 
-	main_lvds_dual_epwm1_pins_default: main-lvds-dual-epwm1-pins-default {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01bc, PIN_OUTPUT, 2) /* (A14) SPI0_CLK.EHRPWM1_A */
-		>;
-	};
+
 };
 
-&main_gpio0 {
-	pinctrl-names ="default";
-	pinctrl-0=<
-				&main_uart4_rst_pins_default
-				&main_uart6_rst_pins_default
-				&main_epwm0_lvds0_pins_default
-				&main_epwm0_lvds1_pins_default>;
-	status = "okay";
-};
+
 
 &dss {
 	pinctrl-names = "default";
@@ -162,15 +167,15 @@
 	};
 };
 
-// &epwm0 {
-// 	pinctrl-names = "default";
-// 	pinctrl-0 = <&main_epwm0_b_pins_default>;
-// 	status = "okay";
-// };
+ &epwm0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&epwm0_pins_default>;
+ 	status = "okay";
+ };
 
 &epwm1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&main_lvds_dual_epwm1_pins_default>;
+	pinctrl-0 = <&epwm1_pins_default>;
 	status = "okay";
 };
 
