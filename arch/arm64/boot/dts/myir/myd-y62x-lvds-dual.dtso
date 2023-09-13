@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: GPL-2.0
-// SPDX-License-Identifier: GPL-2.0
-/*
- * ALINX AN5641 & Digilent PCam 5C - OV5640 camera module
- * Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
+/**
+ * Microtips integrated OLDI panel and touch DT overlay for AM625 - SK
+ *
+ * Copyright (C) 2021 Texas Instruments Incorporated - http://www.ti.com/
  */
-
 
 /dts-v1/;
 /plugin/;
-
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
-
 #include "k3-pinctrl.h"
 
 &{/} {
 
-	lvds_backlight: lvds_backlight {
+
+				lvds_backlight: lvds_backlight {
 					compatible = "pwm-backlight";
-					pwms = <&epwm0 0 100000 1>;
+					pwms = <&epwm1 0 100000 1>;
 					status = "okay";
 					pinctrl-names = "default";
+					pinctrl-0 = <&main_bkl_en_pins_default>;
+					enable-gpios = <&main_gpio1 30 GPIO_ACTIVE_HIGH>;
 					brightness-levels = < 0  1  2  3  4  5  6  7  8  9
 							     10 11 12 13 14 15 16 17 18 19
 							     20 21 22 23 24 25 26 27 28 29
@@ -36,43 +36,46 @@
 				};
 
 			
+
 				panel_lvds: panel-lvds {
-		    compatible = "panel-lvds";
-		    backlight = <&lvds_backlight>;
-    
-				width-mm = <154>;
-				height-mm = <85>;
-		    data-mapping = "vesa-24";
-				panel-timing {
-						clock-frequency = <38000000>;
-						hactive = <1024>;
-						hfront-porch = <88>;
-						hsync-len = <6>;
-						hback-porch = <176>;
-						 
-						vactive = <600>;
-						vfront-porch = <25>; 
-						vsync-len = <5>;
-						vback-porch = <20>;
-						
+					compatible = "panel-lvds";
+					backlight = <&lvds_backlight>;
+					lable = "LVDS";
+					width-mm = <396>;
+					height-mm = <324>;
+					data-mapping = "vesa-24";
+					power-supply = <&lvds_power>;
+
+					panel-timing {
+						clock-frequency = <90000000>;
+						hactive = <1280>;
+						hfront-porch = <180>;
+						hsync-len = <28>;
+						hback-porch = <200>;
+
+						vactive = <1024>;
+						vfront-porch = <5>;
+						vsync-len = <6>;
+						vback-porch = <39>;
+
 						hsync-active = <0>;
 						vsync-active = <1>;
 						de-active = <1>;
 						pixelclk-active = <0>;
-			  };
+					};
 
 					ports {
 						#address-cells = <1>;
 						#size-cells = <0>;
 						port@0 {
-						
+							dual-lvds-odd-pixels;
 							lcd_in0: endpoint {
 								remote-endpoint = <&oldi_out0>;
 							};
 						};
 
 						port@1 {
-						
+							dual-lvds-even-pixels;
 							lcd_in1: endpoint {
 								remote-endpoint = <&oldi_out1>;
 							};
@@ -81,7 +84,6 @@
 		
 		};
 	};
-	
 };
 
 &main_pmx0 {
@@ -110,36 +112,18 @@
 		>;
 	};
 
-	main_lvds0_tpcs_pins_default: main-lvds0-tpcs-pins-default {
+	main_bkl_en_pins_default: main-bkl-en-pins-default {
 		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01c0, PIN_OUTPUT, 7) /* (B13) SPI0_D0.GPIO1_18 */
-			AM62X_IOPAD(0x0098, PIN_INPUT, 7) /* (U23) GPMC0_WAIT0.GPIO0_37 */
+			AM62X_IOPAD(0x01f0, PIN_OUTPUT_PULLUP, 7) /* (A18) EXT_REFCLK1.GPIO1_30 */
 		>;
 	};
 
-	main_lvds1_tpcs_pins_default: main-lvds1-tpcs-pins-default {
+	main_epwm1_a_pins_default: main-epwm1-a-pins-default {
 		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01c4, PIN_OUTPUT, 7) /* (B14) SPI0_D1.GPIO1_19 */
-			AM62X_IOPAD(0x00a4, PIN_INPUT, 7) /* (M22) GPMC0_CLK.GPIO0_40*/
+			AM62X_IOPAD(0x01bc, PIN_OUTPUT, 2) /* (A14) SPI0_CLK.EHRPWM1_A */
 		>;
 	};
-
-	epwm0_b_pins_default: epwm0-b-pins-default {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01b8, PIN_OUTPUT, 7) /* (C13) SPI0_CS1.EHRPWM0_B */
-		>;
-	};
-	
-	epwm0_a_pins_default: epwm0-a-pins-default {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x01b4, PIN_OUTPUT, 7) /* (A13) SPI0_CS0.EHRPWM0_A */
-		>;
-	};
-
-
 };
-
-
 
 &dss {
 	pinctrl-names = "default";
@@ -166,52 +150,18 @@
 			remote-endpoint = <&lcd_in1>;
 		};
 	};
-	
 
-};
+	port@1 {
+		reg = <1>;
 
- &epwm0 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&epwm0_a_pins_default &epwm0_b_pins_default>;
- 	status = "okay";
- };
-
-
-
-&main_i2c1 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	edt-ft5x06@38 {
-		compatible = "edt,edt-ft5406";
-		reg = <0x38>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&main_lvds0_tpcs_pins_default>;
-		interrupt-parent = <&main_gpio0>;
-		interrupts = <37 IRQ_TYPE_EDGE_FALLING>;
-		reset-gpios = <&main_gpio1 18 GPIO_ACTIVE_LOW>;
-		// wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
-		touchscreen-size-x=<1024>;
-		touchscreen-size-y=<600>;
-		status = "okay";
+		dpi1_out: endpoint {
+			remote-endpoint = <&sii9022_in>;
+		};
 	};
 };
 
-&main_i2c3 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	edt-ft5x06-1@38 {
-		compatible = "edt,edt-ft5406";
-		reg = <0x38>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&main_lvds1_tpcs_pins_default>;
-		interrupt-parent = <&main_gpio0>;
-		interrupts = <40 IRQ_TYPE_EDGE_FALLING>;
-		reset-gpios = <&main_gpio1 19 GPIO_ACTIVE_LOW>;
-		// wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
-		touchscreen-size-x=<1024>;
-		touchscreen-size-y=<600>;
-		status = "okay";
-	};
+&epwm1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_epwm1_a_pins_default>;
+	status = "okay";
 };

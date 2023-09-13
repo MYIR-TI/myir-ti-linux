@@ -7,3 +7,4 @@ dtb-$(CONFIG_ARCH_K3) += myd-y62x-6254.dtb
 dtb-$(CONFIG_ARCH_K3) += myd-y62x-6252.dtb
 dtb-$(CONFIG_ARCH_K3) += myd-y62x-6231.dtb
 dtb-$(CONFIG_ARCH_K3) += myd-y62x-lvds.dtbo
+dtb-$(CONFIG_ARCH_K3) += myd-y62x-lvds-dual.dtbo
