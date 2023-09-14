@@ -225,11 +225,6 @@
 		pinctrl-1 = <&csi_io_power_pins_default>;
 	};
 
-	hdmi_mstrclk: hdmi-mstrclk {
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-		clock-frequency = <12288000>;
-	};
 
 
 
@@ -676,8 +671,6 @@
 		compatible = "sil,sii9022";
 		reg = <0x3b>;
 		status = "okay";
-		clocks = <&hdmi_mstrclk>;
-		clock-names = "mclk";
 		iovcc-supply = <&vcc_3v3_sys>;
 		cvcc12-supply = <&vcc_1v8>;
 	
