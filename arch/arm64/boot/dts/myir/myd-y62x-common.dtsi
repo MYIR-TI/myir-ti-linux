@@ -831,7 +831,10 @@
 };
 
 
-
+&usbss0 {
+        status = "okay";
+        ti,vbus-divider;
+};
 &usbss1 {
 	status = "okay";
 	ti,vbus-divider;

@@ -215,7 +215,6 @@ static int ptn5150_i2c_probe(struct i2c_client *i2c)
 	struct ptn5150_info *info;
 	struct fwnode_handle *fwnode;
 	int ret;
-	printk("ptn5150 probe\n");
 
 	if (!np)
 		return -EINVAL;
