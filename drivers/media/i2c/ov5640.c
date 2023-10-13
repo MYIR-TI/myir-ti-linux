@@ -109,7 +109,6 @@
 #define OV5640_REG_POLARITY_CTRL00	0x4740
 #define OV5640_REG_MIPI_CTRL00		0x4800
 #define OV5640_REG_DEBUG_MODE		0x4814
-#define OV5640_REG_PCLK_PERIOD		0x4837
 #define OV5640_REG_ISP_FORMAT_MUX_CTRL	0x501f
 #define OV5640_REG_PRE_ISP_TEST_SET1	0x503d
 #define OV5640_REG_SDE_CTRL0		0x5580
@@ -178,8 +177,8 @@ static const s64 ov5640_csi2_link_freqs[] = {
 	248000000, 192000000, 192000000, 192000000, 96000000,
 };
 
-/* Link freq for default mode: UYVY 640x480, 16 bpp, 2 data lanes. */
-#define OV5640_DEFAULT_LINK_FREQ	19
+/* Link freq for default mode: UYVY 16 bpp, 2 data lanes. */
+#define OV5640_DEFAULT_LINK_FREQ	13
 
 enum ov5640_format_mux {
 	OV5640_FMT_MUX_YUV422 = 0,
@@ -194,142 +193,86 @@ struct ov5640_pixfmt {
 	u32 code;
 	u32 colorspace;
 	u8 bpp;
-	u8 ctrl00;
-	enum ov5640_format_mux mux;
 };
 
 static const struct ov5640_pixfmt ov5640_dvp_formats[] = {
 	{
-		/* YUV422, YUYV */
-		.code		= MEDIA_BUS_FMT_JPEG_1X8,
-		.colorspace	= V4L2_COLORSPACE_JPEG,
-		.bpp		= 16,
-		.ctrl00		= 0x30,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_JPEG_1X8,
+		.colorspace = V4L2_COLORSPACE_JPEG,
+		.bpp = 16,
 	}, {
-		/* YUV422, UYVY */
-		.code		= MEDIA_BUS_FMT_UYVY8_2X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x3f,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_UYVY8_2X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* YUV422, YUYV */
-		.code		= MEDIA_BUS_FMT_YUYV8_2X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x30,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_YUYV8_2X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* RGB565 {g[2:0],b[4:0]},{r[4:0],g[5:3]} */
-		.code		= MEDIA_BUS_FMT_RGB565_2X8_LE,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x6f,
-		.mux		= OV5640_FMT_MUX_RGB,
+		.code = MEDIA_BUS_FMT_RGB565_2X8_LE,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* RGB565 {r[4:0],g[5:3]},{g[2:0],b[4:0]} */
-		.code		= MEDIA_BUS_FMT_RGB565_2X8_BE,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x61,
-		.mux		= OV5640_FMT_MUX_RGB,
+		.code = MEDIA_BUS_FMT_RGB565_2X8_BE,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* Raw, BGBG... / GRGR... */
-		.code		= MEDIA_BUS_FMT_SBGGR8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x00,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SBGGR8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	}, {
-		/* Raw bayer, GBGB... / RGRG... */
-		.code		= MEDIA_BUS_FMT_SGBRG8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x01,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SGBRG8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8
 	}, {
-		/* Raw bayer, GRGR... / BGBG... */
-		.code		= MEDIA_BUS_FMT_SGRBG8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x02,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SGRBG8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	}, {
-		/* Raw bayer, RGRG... / GBGB... */
-		.code		= MEDIA_BUS_FMT_SRGGB8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x03,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SRGGB8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	},
 	{ /* sentinel */ }
 };
 
 static const struct ov5640_pixfmt ov5640_csi2_formats[] = {
 	{
-		/* YUV422, YUYV */
-		.code		= MEDIA_BUS_FMT_JPEG_1X8,
-		.colorspace	= V4L2_COLORSPACE_JPEG,
-		.bpp		= 16,
-		.ctrl00		= 0x30,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_JPEG_1X8,
+		.colorspace = V4L2_COLORSPACE_JPEG,
+		.bpp = 16,
 	}, {
-		/* YUV422, UYVY */
-		.code		= MEDIA_BUS_FMT_UYVY8_1X16,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x3f,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_UYVY8_1X16,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* YUV422, YUYV */
-		.code		= MEDIA_BUS_FMT_YUYV8_1X16,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x30,
-		.mux		= OV5640_FMT_MUX_YUV422,
+		.code = MEDIA_BUS_FMT_YUYV8_1X16,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* RGB565 {g[2:0],b[4:0]},{r[4:0],g[5:3]} */
-		.code		= MEDIA_BUS_FMT_RGB565_1X16,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 16,
-		.ctrl00		= 0x6f,
-		.mux		= OV5640_FMT_MUX_RGB,
+		.code = MEDIA_BUS_FMT_RGB565_1X16,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 16,
 	}, {
-		/* BGR888: RGB */
-		.code		= MEDIA_BUS_FMT_BGR888_1X24,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 24,
-		.ctrl00		= 0x23,
-		.mux		= OV5640_FMT_MUX_RGB,
+		.code = MEDIA_BUS_FMT_BGR888_1X24,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 24,
 	}, {
-		/* Raw, BGBG... / GRGR... */
-		.code		= MEDIA_BUS_FMT_SBGGR8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x00,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SBGGR8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	}, {
-		/* Raw bayer, GBGB... / RGRG... */
-		.code		= MEDIA_BUS_FMT_SGBRG8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x01,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SGBRG8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8
 	}, {
-		/* Raw bayer, GRGR... / BGBG... */
-		.code		= MEDIA_BUS_FMT_SGRBG8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x02,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SGRBG8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	}, {
-		/* Raw bayer, RGRG... / GBGB... */
-		.code		= MEDIA_BUS_FMT_SRGGB8_1X8,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-		.bpp		= 8,
-		.ctrl00		= 0x03,
-		.mux		= OV5640_FMT_MUX_RAW_DPC,
+		.code = MEDIA_BUS_FMT_SRGGB8_1X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+		.bpp = 8,
 	},
 	{ /* sentinel */ }
 };
@@ -730,8 +673,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 160,
 				.height	= 120,
 			},
-			.htot		= 1600,
-			.vblank_def	= 878,
+			.htot		= 1896,
+			.vblank_def	= 864,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -775,8 +718,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 176,
 				.height	= 144,
 			},
-			.htot		= 1600,
-			.vblank_def	= 854,
+			.htot		= 1896,
+			.vblank_def	= 840,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -820,8 +763,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 320,
 				.height	= 240,
 			},
-			.htot		= 1600,
-			.vblank_def	= 760,
+			.htot		= 1896,
+			.vblank_def	= 744,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -865,8 +808,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 640,
 				.height	= 480,
 			},
-			.htot		= 1600,
-			.vblank_def	= 520,
+			.htot		= 1896,
+			.vblank_def	= 600,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -910,7 +853,7 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.height	= 480,
 			},
 			.htot		= 1896,
-			.vblank_def	= 1206,
+			.vblank_def	= 504,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -954,7 +897,7 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.height	= 576,
 			},
 			.htot		= 1896,
-			.vblank_def	= 1110,
+			.vblank_def	= 408,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -997,7 +940,7 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.height	= 768,
 			},
 			.htot		= 1896,
-			.vblank_def	= 918,
+			.vblank_def	= 312,
 		},
 		.reg_data	= ov5640_setting_low_res,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_low_res),
@@ -1039,8 +982,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 1280,
 				.height	= 720,
 			},
-			.htot		= 1600,
-			.vblank_def	= 560,
+			.htot		= 1892,
+			.vblank_def	= 20,
 		},
 		.reg_data	= ov5640_setting_720P_1280_720,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_720P_1280_720),
@@ -1084,8 +1027,8 @@ static const struct ov5640_mode_info ov5640_mode_data[OV5640_NUM_MODES] = {
 				.width	= 1920,
 				.height	= 1080,
 			},
-			.htot		= 2234,
-			.vblank_def	= 24,
+			.htot		= 2500,
+			.vblank_def	= 40,
 		},
 		.reg_data	= ov5640_setting_1080P_1920_1080,
 		.reg_data_size	= ARRAY_SIZE(ov5640_setting_1080P_1920_1080),
@@ -1320,10 +1263,20 @@ static int ov5640_mod_reg(struct ov5640_dev *sensor, u16 reg,
  *                                +-----+-----+
  *                                       +------------> PCLK
  *
- * There seems to be also constraints:
+ * This is deviating from the datasheet at least for the register
+ * 0x3108, since it's said here that the PCLK would be clocked from
+ * the PLL.
+ *
+ * There seems to be also (unverified) constraints:
  *  - the PLL pre-divider output rate should be in the 4-27MHz range
  *  - the PLL multiplier output rate should be in the 500-1000MHz range
  *  - PCLK >= SCLK * 2 in YUV, >= SCLK in Raw or JPEG
+ *
+ * In the two latter cases, these constraints are met since our
+ * factors are hardcoded. If we were to change that, we would need to
+ * take this into account. The only varying parts are the PLL
+ * multiplier and the system clock divider, which are shared between
+ * all these clocks so won't cause any issue.
  */
 
 /*
@@ -1341,6 +1294,13 @@ static int ov5640_mod_reg(struct ov5640_dev *sensor, u16 reg,
  */
 #define OV5640_SYSDIV_MIN	1
 #define OV5640_SYSDIV_MAX	16
+
+/*
+ * Hardcode these values for scaler and non-scaler modes.
+ * FIXME: to be re-calcualted for 1 data lanes setups
+ */
+#define OV5640_MIPI_DIV_PCLK	2
+#define OV5640_MIPI_DIV_SCLK	1
 
 /*
  * This is supposed to be ranging from 1 to 2, but the value is always
@@ -1451,83 +1411,70 @@ out:
 /*
  * ov5640_set_mipi_pclk() - Calculate the clock tree configuration values
  *			    for the MIPI CSI-2 output.
+ *
+ * @rate: The requested bandwidth per lane in bytes per second.
+ *	  'Bandwidth Per Lane' is calculated as:
+ *	  bpl = HTOT * VTOT * FPS * bpp / num_lanes;
+ *
+ * This function use the requested bandwidth to calculate:
+ * - sample_rate = bpl / (bpp / num_lanes);
+ *	         = bpl / (PLL_RDIV * BIT_DIV * PCLK_DIV * MIPI_DIV / num_lanes);
+ *
+ * - mipi_sclk   = bpl / MIPI_DIV / 2; ( / 2 is for CSI-2 DDR)
+ *
+ * with these fixed parameters:
+ *	PLL_RDIV	= 2;
+ *	BIT_DIVIDER	= 2; (MIPI_BIT_MODE == 8 ? 2 : 2,5);
+ *	PCLK_DIV	= 1;
+ *
+ * The MIPI clock generation differs for modes that use the scaler and modes
+ * that do not. In case the scaler is in use, the MIPI_SCLK generates the MIPI
+ * BIT CLk, and thus:
+ *
+ * - mipi_sclk = bpl / MIPI_DIV / 2;
+ *   MIPI_DIV = 1;
+ *
+ * For modes that do not go through the scaler, the MIPI BIT CLOCK is generated
+ * from the pixel clock, and thus:
+ *
+ * - sample_rate = bpl / (bpp / num_lanes);
+ *	         = bpl / (2 * 2 * 1 * MIPI_DIV / num_lanes);
+ *		 = bpl / (4 * MIPI_DIV / num_lanes);
+ * - MIPI_DIV	 = bpp / (4 * num_lanes);
+ *
+ * FIXME: this have been tested with 16bpp and 2 lanes setup only.
+ * MIPI_DIV is fixed to value 2, but it -might- be changed according to the
+ * above formula for setups with 1 lane or image formats with different bpp.
+ *
+ * FIXME: this deviates from the sensor manual documentation which is quite
+ * thin on the MIPI clock tree generation part.
  */
-static int ov5640_set_mipi_pclk(struct ov5640_dev *sensor)
+static int ov5640_set_mipi_pclk(struct ov5640_dev *sensor,
+				unsigned long rate)
 {
-	u8 bit_div, mipi_div, pclk_div, sclk_div, sclk2x_div, root_div;
+	const struct ov5640_mode_info *mode = sensor->current_mode;
 	u8 prediv, mult, sysdiv;
-	unsigned long link_freq;
-	unsigned long sysclk;
-	u8 pclk_period;
-	u32 sample_rate;
-	u32 num_lanes;
+	u8 mipi_div;
 	int ret;
 
-	/* Use the link freq computed at ov5640_update_pixel_rate() time. */
-	link_freq = sensor->current_link_freq;
-
 	/*
-	 * - mipi_div - Additional divider for the MIPI lane clock.
-	 *
-	 * Higher link frequencies would make sysclk > 1GHz.
-	 * Keep the sysclk low and do not divide in the MIPI domain.
+	 * 1280x720 is reported to use 'SUBSAMPLING' only,
+	 * but according to the sensor manual it goes through the
+	 * scaler before subsampling.
 	 */
-	if (link_freq > OV5640_LINK_RATE_MAX)
-		mipi_div = 1;
+	if (mode->dn_mode == SCALING ||
+	   (mode->id == OV5640_MODE_720P_1280_720))
+		mipi_div = OV5640_MIPI_DIV_SCLK;
 	else
-		mipi_div = 2;
+		mipi_div = OV5640_MIPI_DIV_PCLK;
 
-	sysclk = link_freq * mipi_div;
-	ov5640_calc_sys_clk(sensor, sysclk, &prediv, &mult, &sysdiv);
+	ov5640_calc_sys_clk(sensor, rate, &prediv, &mult, &sysdiv);
 
-	/*
-	 * Adjust PLL parameters to maintain the MIPI_SCLK-to-PCLK ratio.
-	 *
-	 * - root_div = 2 (fixed)
-	 * - bit_div : MIPI 8-bit = 2; MIPI 10-bit = 2.5
-	 * - pclk_div = 1 (fixed)
-	 * - p_div  = (2 lanes ? mipi_div : 2 * mipi_div)
-	 *
-	 * This results in the following MIPI_SCLK depending on the number
-	 * of lanes:
-	 *
-	 * - 2 lanes: MIPI_SCLK = (4 or 5) * PCLK
-	 * - 1 lanes: MIPI_SCLK = (8 or 10) * PCLK
-	 */
-	root_div = OV5640_PLL_CTRL3_PLL_ROOT_DIV_2;
-	bit_div =  OV5640_PLL_CTRL0_MIPI_MODE_8BIT;
-	pclk_div = ilog2(OV5640_PCLK_ROOT_DIV);
+	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL0,
+			     0x0f, OV5640_PLL_CTRL0_MIPI_MODE_8BIT);
 
-	/*
-	 * Scaler clock:
-	 * - YUV: PCLK >= 2 * SCLK
-	 * - RAW or JPEG: PCLK >= SCLK
-	 * - sclk2x_div = sclk_div / 2
-	 */
-	sclk_div = ilog2(OV5640_SCLK_ROOT_DIV);
-	sclk2x_div = ilog2(OV5640_SCLK2X_ROOT_DIV);
-
-	/*
-	 * Set the pixel clock period expressed in ns with 1-bit decimal
-	 * (0x01=0.5ns).
-	 *
-	 * The register is very briefly documented. In the OV5645 datasheet it
-	 * is described as (2 * pclk period), and from testing it seems the
-	 * actual definition is 2 * 8-bit sample period.
-	 *
-	 * 2 * sample_period = (mipi_clk * 2 * num_lanes / bpp) * (bpp / 8) / 2
-	 */
-	num_lanes = sensor->ep.bus.mipi_csi2.num_data_lanes;
-	sample_rate = (link_freq * mipi_div * num_lanes * 2) / 16;
-	pclk_period = 2000000000UL / sample_rate;
-
-	/* Program the clock tree registers. */
-	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL0, 0x0f, bit_div);
-	if (ret)
-		return ret;
-
-	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL1, 0xff,
-			     (sysdiv << 4) | mipi_div);
+	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL1,
+			     0xff, sysdiv << 4 | mipi_div);
 	if (ret)
 		return ret;
 
@@ -1535,29 +1482,13 @@ static int ov5640_set_mipi_pclk(struct ov5640_dev *sensor)
 	if (ret)
 		return ret;
 
-	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL3, 0x1f,
-			     root_div | prediv);
+	ret = ov5640_mod_reg(sensor, OV5640_REG_SC_PLL_CTRL3,
+			     0x1f, OV5640_PLL_CTRL3_PLL_ROOT_DIV_2 | prediv);
 	if (ret)
 		return ret;
 
-	ret = ov5640_mod_reg(sensor, OV5640_REG_SYS_ROOT_DIVIDER, 0x3f,
-			     (pclk_div << 4) | (sclk2x_div << 2) | sclk_div);
-	if (ret)
-		return ret;
-
-	return ov5640_write_reg(sensor, OV5640_REG_PCLK_PERIOD, pclk_period);
-}
-
-static u32 ov5640_calc_pixel_rate(struct ov5640_dev *sensor)
-{
-	const struct ov5640_mode_info *mode = sensor->current_mode;
-	const struct ov5640_timings *timings = &mode->dvp_timings;
-	u32 rate;
-
-	rate = timings->htot * (timings->crop.height + timings->vblank_def);
-	rate *= ov5640_framerates[sensor->current_fr];
-
-	return rate;
+	return ov5640_mod_reg(sensor, OV5640_REG_SYS_ROOT_DIVIDER,
+			      0x30, OV5640_PLL_SYS_ROOT_DIVIDER_BYPASS);
 }
 
 static unsigned long ov5640_calc_pclk(struct ov5640_dev *sensor,
@@ -1577,15 +1508,10 @@ static unsigned long ov5640_calc_pclk(struct ov5640_dev *sensor,
 	return _rate / *pll_rdiv / *bit_div / *pclk_div;
 }
 
-static int ov5640_set_dvp_pclk(struct ov5640_dev *sensor)
+static int ov5640_set_dvp_pclk(struct ov5640_dev *sensor, unsigned long rate)
 {
 	u8 prediv, mult, sysdiv, pll_rdiv, bit_div, pclk_div;
-	u32 rate;
 	int ret;
-
-	rate = ov5640_calc_pixel_rate(sensor);
-	rate *= ov5640_code_to_bpp(sensor, sensor->fmt.code);
-	rate /= sensor->ep.bus.parallel.bus_width;
 
 	ov5640_calc_pclk(sensor, rate, &prediv, &mult, &sysdiv, &pll_rdiv,
 			 &bit_div, &pclk_div);
@@ -2143,6 +2069,18 @@ ov5640_find_mode(struct ov5640_dev *sensor, int width, int height, bool nearest)
 	return mode;
 }
 
+static u64 ov5640_calc_pixel_rate(struct ov5640_dev *sensor)
+{
+	const struct ov5640_mode_info *mode = sensor->current_mode;
+	const struct ov5640_timings *timings = &mode->dvp_timings;
+	u64 rate;
+
+	rate = timings->htot * (timings->crop.height + timings->vblank_def);
+	rate *= ov5640_framerates[sensor->current_fr];
+
+	return rate;
+}
+
 /*
  * sensor changes between scaling and subsampling, go through
  * exposure calculation
@@ -2326,6 +2264,7 @@ static int ov5640_set_mode(struct ov5640_dev *sensor)
 	enum ov5640_downsize_mode dn_mode, orig_dn_mode;
 	bool auto_gain = sensor->ctrls.auto_gain->val == 1;
 	bool auto_exp =  sensor->ctrls.auto_exp->val == V4L2_EXPOSURE_AUTO;
+	unsigned long rate;
 	int ret;
 
 	dn_mode = mode->dn_mode;
@@ -2344,10 +2283,19 @@ static int ov5640_set_mode(struct ov5640_dev *sensor)
 			goto restore_auto_gain;
 	}
 
-	if (ov5640_is_csi2(sensor))
-		ret = ov5640_set_mipi_pclk(sensor);
-	else
-		ret = ov5640_set_dvp_pclk(sensor);
+	/*
+	 * All the formats we support have 16 bits per pixel, seems to require
+	 * the same rate than YUV, so we can just use 16 bpp all the time.
+	 */
+	rate = ov5640_calc_pixel_rate(sensor) * 16;
+	if (ov5640_is_csi2(sensor)) {
+		rate = rate / sensor->ep.bus.mipi_csi2.num_data_lanes;
+		ret = ov5640_set_mipi_pclk(sensor, rate);
+	} else {
+		rate = rate / sensor->ep.bus.parallel.bus_width;
+		ret = ov5640_set_dvp_pclk(sensor, rate);
+	}
+
 	if (ret < 0)
 		return 0;
 
@@ -2730,22 +2678,6 @@ power_off:
 	return ret;
 }
 
-static int ov5640_sensor_suspend(struct device *dev)
-{
-	struct v4l2_subdev *sd = dev_get_drvdata(dev);
-	struct ov5640_dev *ov5640 = to_ov5640_dev(sd);
-
-	return ov5640_set_power(ov5640, false);
-}
-
-static int ov5640_sensor_resume(struct device *dev)
-{
-	struct v4l2_subdev *sd = dev_get_drvdata(dev);
-	struct ov5640_dev *ov5640 = to_ov5640_dev(sd);
-
-	return ov5640_set_power(ov5640, true);
-}
-
 /* --------------- Subdev Operations --------------- */
 
 static int ov5640_try_frame_interval(struct ov5640_dev *sensor,
@@ -3045,21 +2977,76 @@ static int ov5640_get_selection(struct v4l2_subdev *sd,
 static int ov5640_set_framefmt(struct ov5640_dev *sensor,
 			       struct v4l2_mbus_framefmt *format)
 {
-	bool is_jpeg = format->code == MEDIA_BUS_FMT_JPEG_1X8;
-	const struct ov5640_pixfmt *pixfmt;
 	int ret = 0;
+	bool is_jpeg = false;
+	u8 fmt, mux;
 
-	pixfmt = ov5640_code_to_pixfmt(sensor, format->code);
+	switch (format->code) {
+	case MEDIA_BUS_FMT_UYVY8_1X16:
+	case MEDIA_BUS_FMT_UYVY8_2X8:
+		/* YUV422, UYVY */
+		fmt = 0x3f;
+		mux = OV5640_FMT_MUX_YUV422;
+		break;
+	case MEDIA_BUS_FMT_YUYV8_1X16:
+	case MEDIA_BUS_FMT_YUYV8_2X8:
+		/* YUV422, YUYV */
+		fmt = 0x30;
+		mux = OV5640_FMT_MUX_YUV422;
+		break;
+	case MEDIA_BUS_FMT_RGB565_2X8_LE:
+	case MEDIA_BUS_FMT_RGB565_1X16:
+		/* RGB565 {g[2:0],b[4:0]},{r[4:0],g[5:3]} */
+		fmt = 0x6F;
+		mux = OV5640_FMT_MUX_RGB;
+		break;
+	case MEDIA_BUS_FMT_RGB565_2X8_BE:
+		/* RGB565 {r[4:0],g[5:3]},{g[2:0],b[4:0]} */
+		fmt = 0x61;
+		mux = OV5640_FMT_MUX_RGB;
+		break;
+	case MEDIA_BUS_FMT_BGR888_1X24:
+		/* BGR888: RGB */
+		fmt = 0x23;
+		mux = OV5640_FMT_MUX_RGB;
+		break;
+	case MEDIA_BUS_FMT_JPEG_1X8:
+		/* YUV422, YUYV */
+		fmt = 0x30;
+		mux = OV5640_FMT_MUX_YUV422;
+		is_jpeg = true;
+		break;
+	case MEDIA_BUS_FMT_SBGGR8_1X8:
+		/* Raw, BGBG... / GRGR... */
+		fmt = 0x00;
+		mux = OV5640_FMT_MUX_RAW_DPC;
+		break;
+	case MEDIA_BUS_FMT_SGBRG8_1X8:
+		/* Raw bayer, GBGB... / RGRG... */
+		fmt = 0x01;
+		mux = OV5640_FMT_MUX_RAW_DPC;
+		break;
+	case MEDIA_BUS_FMT_SGRBG8_1X8:
+		/* Raw bayer, GRGR... / BGBG... */
+		fmt = 0x02;
+		mux = OV5640_FMT_MUX_RAW_DPC;
+		break;
+	case MEDIA_BUS_FMT_SRGGB8_1X8:
+		/* Raw bayer, RGRG... / GBGB... */
+		fmt = 0x03;
+		mux = OV5640_FMT_MUX_RAW_DPC;
+		break;
+	default:
+		return -EINVAL;
+	}
 
 	/* FORMAT CONTROL00: YUV and RGB formatting */
-	ret = ov5640_write_reg(sensor, OV5640_REG_FORMAT_CONTROL00,
-			       pixfmt->ctrl00);
+	ret = ov5640_write_reg(sensor, OV5640_REG_FORMAT_CONTROL00, fmt);
 	if (ret)
 		return ret;
 
 	/* FORMAT MUX CONTROL: ISP YUV or RGB */
-	ret = ov5640_write_reg(sensor, OV5640_REG_ISP_FORMAT_MUX_CTRL,
-			       pixfmt->mux);
+	ret = ov5640_write_reg(sensor, OV5640_REG_ISP_FORMAT_MUX_CTRL, mux);
 	if (ret)
 		return ret;
 
@@ -3333,9 +3320,6 @@ static int ov5640_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 
 	/* v4l2_ctrl_lock() locks our own mutex */
 
-	if (!pm_runtime_get_if_in_use(&sensor->i2c_client->dev))
-		return 0;
-
 	switch (ctrl->id) {
 	case V4L2_CID_AUTOGAIN:
 		val = ov5640_get_gain(sensor);
@@ -3351,9 +3335,6 @@ static int ov5640_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 		break;
 	}
 
-	pm_runtime_mark_last_busy(&sensor->i2c_client->dev);
-	pm_runtime_put_autosuspend(&sensor->i2c_client->dev);
-
 	return 0;
 }
 
@@ -3361,6 +3342,7 @@ static int ov5640_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct v4l2_subdev *sd = ctrl_to_sd(ctrl);
 	struct ov5640_dev *sensor = to_ov5640_dev(sd);
+	struct device *dev = &sensor->i2c_client->dev;
 	const struct ov5640_mode_info *mode = sensor->current_mode;
 	const struct ov5640_timings *timings;
 	unsigned int exp_max;
@@ -3383,9 +3365,9 @@ static int ov5640_s_ctrl(struct v4l2_ctrl *ctrl)
 	/*
 	 * If the device is not powered up by the host driver do
 	 * not apply any controls to H/W at this time. Instead
-	 * the controls will be restored at start streaming time.
+	 * the controls will be restored right after power-up.
 	 */
-	if (!pm_runtime_get_if_in_use(&sensor->i2c_client->dev))
+	if (pm_runtime_suspended(dev))
 		return 0;
 
 	switch (ctrl->id) {
@@ -3426,9 +3408,6 @@ static int ov5640_s_ctrl(struct v4l2_ctrl *ctrl)
 		ret = -EINVAL;
 		break;
 	}
-
-	pm_runtime_mark_last_busy(&sensor->i2c_client->dev);
-	pm_runtime_put_autosuspend(&sensor->i2c_client->dev);
 
 	return ret;
 }
@@ -3705,35 +3684,34 @@ static int ov5640_enum_mbus_code(struct v4l2_subdev *sd,
 static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 {
 	struct ov5640_dev *sensor = to_ov5640_dev(sd);
+	struct device *dev = &sensor->i2c_client->dev;
 	int ret = 0;
-
-	if (enable) {
-		ret = pm_runtime_resume_and_get(&sensor->i2c_client->dev);
-		if (ret < 0)
-			return ret;
-
-		ret = v4l2_ctrl_handler_setup(&sensor->ctrls.handler);
-		if (ret) {
-			pm_runtime_put(&sensor->i2c_client->dev);
-			return ret;
-		}
-	}
 
 	mutex_lock(&sensor->lock);
 
-	if (sensor->streaming == !enable) {
-		if (enable && sensor->pending_mode_change) {
+	if (sensor->streaming == enable) {
+		mutex_unlock(&sensor->lock);
+		return 0;
+	}
+
+	if (enable) {
+		ret = pm_runtime_resume_and_get(dev);
+		if (ret < 0)
+			goto err;
+
+		if (sensor->pending_mode_change) {
 			ret = ov5640_set_mode(sensor);
 			if (ret)
-				goto out;
+				goto put_pm;
 		}
 
-		if (enable && sensor->pending_fmt_change) {
+		if (sensor->pending_fmt_change) {
 			ret = ov5640_set_framefmt(sensor, &sensor->fmt);
 			if (ret)
-				goto out;
+				goto put_pm;
 			sensor->pending_fmt_change = false;
 		}
+
 
 		if (ov5640_is_csi2(sensor))
 			ret = ov5640_set_stream_mipi(sensor, enable);
@@ -3744,14 +3722,14 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 			sensor->streaming = enable;
 	}
 
-out:
+	sensor->streaming = enable;
 	mutex_unlock(&sensor->lock);
+	return 0;
 
-	if (!enable || ret) {
-		pm_runtime_mark_last_busy(&sensor->i2c_client->dev);
-		pm_runtime_put_autosuspend(&sensor->i2c_client->dev);
-	}
-
+put_pm:
+	pm_runtime_put(dev);
+err:
+	mutex_unlock(&sensor->lock);
 	return ret;
 }
 
@@ -3820,20 +3798,49 @@ static int ov5640_check_chip_id(struct ov5640_dev *sensor)
 	int ret = 0;
 	u16 chip_id;
 
+	ret = ov5640_set_power_on(sensor);
+	if (ret)
+		return ret;
+
 	ret = ov5640_read_reg16(sensor, OV5640_REG_CHIP_ID, &chip_id);
 	if (ret) {
 		dev_err(&client->dev, "%s: failed to read chip identifier\n",
 			__func__);
-		return ret;
+		goto power_off;
 	}
 
 	if (chip_id != 0x5640) {
 		dev_err(&client->dev, "%s: wrong chip identifier, expected 0x5640, got 0x%x\n",
 			__func__, chip_id);
-		return -ENXIO;
+		ret = -ENXIO;
 	}
 
-	return 0;
+power_off:
+	ov5640_set_power_off(sensor);
+	return ret;
+}
+
+static int ov5640_suspend(struct device *dev)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct v4l2_subdev *subdev = i2c_get_clientdata(client);
+	struct ov5640_dev *sensor = to_ov5640_dev(subdev);
+
+	return ov5640_set_power(sensor, false);
+}
+
+static int ov5640_resume(struct device *dev)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct v4l2_subdev *subdev = i2c_get_clientdata(client);
+	struct ov5640_dev *sensor = to_ov5640_dev(subdev);
+	int ret = 0;
+
+	ret = ov5640_set_power(sensor, true);
+	if (ret)
+		return ret;
+
+	return __v4l2_ctrl_handler_setup(&sensor->ctrls.handler);
 }
 
 static int ov5640_probe(struct i2c_client *client)
@@ -3927,69 +3934,53 @@ static int ov5640_probe(struct i2c_client *client)
 
 	ret = ov5640_get_regulators(sensor);
 	if (ret)
-		goto entity_cleanup;
+		return ret;
 
 	mutex_init(&sensor->lock);
+
+	ret = ov5640_check_chip_id(sensor);
+	if (ret)
+		goto entity_cleanup;
 
 	ret = ov5640_init_controls(sensor);
 	if (ret)
 		goto entity_cleanup;
 
-	ret = ov5640_sensor_resume(dev);
-	if (ret) {
-		dev_err(dev, "failed to power on\n");
-		goto entity_cleanup;
-	}
-
-	pm_runtime_set_active(dev);
-	pm_runtime_get_noresume(dev);
 	pm_runtime_enable(dev);
-
-	ret = ov5640_check_chip_id(sensor);
-	if (ret)
-		goto err_pm_runtime;
+	pm_runtime_set_suspended(dev);
 
 	ret = v4l2_async_register_subdev_sensor(&sensor->sd);
 	if (ret)
-		goto err_pm_runtime;
-
-	pm_runtime_set_autosuspend_delay(dev, 1000);
-	pm_runtime_use_autosuspend(dev);
-	pm_runtime_mark_last_busy(dev);
-	pm_runtime_put_autosuspend(dev);
+		goto pm_disable;
 
 	return 0;
 
-err_pm_runtime:
-	pm_runtime_put_noidle(dev);
+pm_disable:
 	pm_runtime_disable(dev);
 	v4l2_ctrl_handler_free(&sensor->ctrls.handler);
-	ov5640_sensor_suspend(dev);
 entity_cleanup:
 	media_entity_cleanup(&sensor->sd.entity);
 	mutex_destroy(&sensor->lock);
 	return ret;
 }
 
-static void ov5640_remove(struct i2c_client *client)
+static int ov5640_remove(struct i2c_client *client)
 {
+	struct device *dev = &client->dev;
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 	struct ov5640_dev *sensor = to_ov5640_dev(sd);
-	struct device *dev = &client->dev;
-
-	pm_runtime_disable(dev);
-	if (!pm_runtime_status_suspended(dev))
-		ov5640_sensor_suspend(dev);
-	pm_runtime_set_suspended(dev);
 
 	v4l2_async_unregister_subdev(&sensor->sd);
 	media_entity_cleanup(&sensor->sd.entity);
+	pm_runtime_disable(dev);
 	v4l2_ctrl_handler_free(&sensor->ctrls.handler);
 	mutex_destroy(&sensor->lock);
+
+	return 0;
 }
 
 static const struct dev_pm_ops ov5640_pm_ops = {
-	SET_RUNTIME_PM_OPS(ov5640_sensor_suspend, ov5640_sensor_resume, NULL)
+	SET_RUNTIME_PM_OPS(ov5640_suspend, ov5640_resume, NULL)
 };
 
 static const struct i2c_device_id ov5640_id[] = {
@@ -4012,7 +4003,6 @@ static struct i2c_driver ov5640_i2c_driver = {
 	},
 	.id_table = ov5640_id,
 	.probe_new = ov5640_probe,
-	.remove   = ov5640_remove,
 };
 
 module_i2c_driver(ov5640_i2c_driver);
