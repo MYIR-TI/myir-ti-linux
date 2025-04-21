@@ -465,9 +465,24 @@ static int spinand_write_to_cache_op(struct spinand_device *spinand,
 		wdesc = spinand->dirmaps[req->pos.plane].wdesc;
 	else
 		wdesc = spinand->dirmaps[req->pos.plane].wdesc_ecc;
-
+	
+	pr_info("spinand_id:0x%x 0x%x 0x%x\r\n",spinand->id.data[0],spinand->id.data[1],spinand->id.data[2]);
+	//match the foresee ids
+	if (spinand->id.data[0] == 0xCD) {
+		pr_info("foresee id pass\r\n");
+		wdesc->info.op_tmpl = *spinand->data_ops.write_cache;
+		
+		ret = spi_mem_dirmap_write(wdesc, column, 1, buf);
+		
+		if (ret < 0)
+			pr_info("foresee cmd error\r\n");
+			
+		wdesc->info.op_tmpl = *spinand->data_ops.update_cache;
+	}
+	
 	while (nbytes) {
 		ret = spi_mem_dirmap_write(wdesc, column, nbytes, buf);
+		
 		if (ret < 0)
 			return ret;
 
@@ -956,6 +971,7 @@ static const struct spinand_manufacturer *spinand_manufacturers[] = {
 	&paragon_spinand_manufacturer,
 	&toshiba_spinand_manufacturer,
 	&winbond_spinand_manufacturer,
+	&foresee_spinand_manufacturer,
 	&xtx_spinand_manufacturer,
 };
 

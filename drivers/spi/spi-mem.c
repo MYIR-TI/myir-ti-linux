@@ -754,7 +754,6 @@ ssize_t spi_mem_dirmap_write(struct spi_mem_dirmap_desc *desc,
 			return ret;
 
 		ret = ctlr->mem_ops->dirmap_write(desc, offs, len, buf);
-
 		spi_mem_access_end(desc->mem);
 	} else {
 		ret = -ENOTSUPP;
