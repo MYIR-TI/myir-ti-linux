@@ -282,6 +282,7 @@ void gpmc_cs_write_reg(int cs, int idx, u32 val)
 	reg_addr = gpmc_base + GPMC_CS0_OFFSET + (cs * GPMC_CS_SIZE) + idx;
 	writel_relaxed(val, reg_addr);
 }
+EXPORT_SYMBOL(gpmc_cs_write_reg);
 
 static u32 gpmc_cs_read_reg(int cs, int idx)
 {
