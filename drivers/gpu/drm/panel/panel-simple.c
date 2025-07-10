@@ -3880,6 +3880,58 @@ static const struct panel_desc raspberrypi_7inch = {
 	.connector_type = DRM_MODE_CONNECTOR_DSI,
 };
 
+static const struct drm_display_mode myir_800x1280_mode = {
+	.clock			= 82550,
+	.hdisplay		= 800,
+	.hsync_start		= 800 + 100,
+	.hsync_end		= 800 + 100 + 32,
+	.htotal			= 800 + 100 + 32 + 100,
+	.vdisplay		= 1280,
+	.vsync_start		= 1280 + 20,
+	.vsync_end		= 1280 + 20 + 3,
+	.vtotal			= 1280 + 20 + 3 + 30,
+
+	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
+};
+
+static const struct panel_desc myir_800x1280 = {
+	.modes = &myir_800x1280_mode,
+	.num_modes = 1,
+	.bpc = 8,
+	.size = {
+		.width = 94,
+		.height = 151,
+	},
+	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
+	.connector_type = DRM_MODE_CONNECTOR_DSI,
+};
+
+static const struct drm_display_mode myir_1200x1920_mode = {
+	.clock = 101550,
+	.hdisplay = 1200,
+	.hsync_start = 1200 + 48,
+	.hsync_end = 1200 + 48 + 32,
+	.htotal = 1200 + 48 + 32 + 56,
+	.vdisplay = 1920,
+	.vsync_start = 1920 + 3,
+	.vsync_end = 1920 + 3 + 3,
+	.vtotal = 1920 + 3 + 3 + 4,
+
+	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
+};
+
+static const struct panel_desc myir_1200x1920 = {
+	.modes = &myir_1200x1920_mode,
+	.num_modes = 1,
+	.bpc = 8,
+	.size = {
+		.width = 136,
+		.height = 217,
+	},
+	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
+	.connector_type = DRM_MODE_CONNECTOR_DSI,
+};
+
 static const struct display_timing rocktech_rk070er9427_timing = {
 	.pixelclock = { 26400000, 33300000, 46800000 },
 	.hactive = { 800, 800, 800 },
@@ -5006,6 +5058,12 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "raspberrypi,7inch-dsi",
 		.data = &raspberrypi_7inch,
+	}, {
+		.compatible = "myir,800x1280-dsi",
+		.data = &myir_800x1280,
+	}, {
+		.compatible = "myir,1200x1920-dsi",
+		.data = &myir_1200x1920,
 	}, {
 		.compatible = "rocktech,rk070er9427",
 		.data = &rocktech_rk070er9427,
