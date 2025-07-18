@@ -813,7 +813,7 @@
 	non-removable;
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc0_pins_default>;
-	status = "disabled";
+	status = "okay";
 	bootph-all;
 };
 
@@ -872,45 +872,49 @@
 		cdns,phy-mode;
 
 		partitions {
+			bootph-all;
 			compatible = "fixed-partitions";
 			#address-cells = <1>;
 			#size-cells = <1>;
 
 			partition@0 {
-				label = "NAND.tiboot3";
-				reg = <0x00000000 0x00080000>;	/* 512KB */
+				label = "nand.tiboot3";
+				reg = <0x0 0x80000>;	/* 512KB */
 			};
+
 			partition@80000 {
-				label = "NAND.tispl";
-				reg = <0x80000 0x180000>; /* 1.5M */
+				label = "nand.tispl";
+				reg = <0x80000 0x200000>;	/* 2MB */
 			};
-			partition@400000 {
-				label = "NAND.u-boot";
-				reg = <0x00400000 0x00200000>;  /* 2M */
+
+			partition@2c0000 {
+				label = "nand.u-boot";
+				reg = <0x2c0000 0x300000>;	/* 3MB */
 			};
+
+			partition@5c0000 {
+				label = "nand.env";
+				reg = <0x5c0000 0x40000>;	/* 256KB */
+			};
+
 			partition@600000 {
-				label = "NAND.tiboot3.backup";
-				reg = <0x00600000 0x00080000>;	/* 512KB */
+				label = "nand.kernel";
+				reg = <0x600000 0x1e00000>;	/* 30MB */
 			};
-			partition@680000 {
-				label = "NAND.tispl.backup";
-				reg = <0x00680000 0x180000>; /* 1.5M */
+
+			partition@2400000 {
+				label = "nand.dtb";
+				reg = <0x2400000 0x100000>;	/* 1MB */
 			};
-			partition@800000 {
-				label = "NAND.u-boot.backup";
-				reg = <0x00800000 0x00200000>;  /* 2M */
+
+			partition@2500000 {
+				label = "nand.rootfs";
+				reg = <0x2500000 0x1dac0000>;	/* 474.75MB */
 			};
-			partition@a00000 {
-				label = "NAND.u-boot-env";
-				reg = <0x00a00000 0x00040000>;  /* 256K */
-			};
-			partition@a40000 {
-				label = "NAND.u-boot-env.backup";
-				reg = <0x00a40000 0x00040000>;  /* 256K */
-			};
-			partition@a80000 {
-				label = "NAND.file-system";
-				reg = <0x00a80000 0x1f580000>;
+			partition@1ffc0000 {
+				bootph-all;
+				label = "nand.phypattern";
+				reg = <0x1ffc0000 0x40000>;	/* 256KB */
 			};
 		};
 	};
