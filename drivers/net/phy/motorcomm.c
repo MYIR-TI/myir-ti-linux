@@ -1677,6 +1677,17 @@ static int yt8521_config_init(struct phy_device *phydev)
 		if (ret < 0)
 			goto err_restore_page;
 	}
+
+	ret = ytphy_write_ext(phydev, 0xa00d, 0x2600);
+	if (ret) {
+		return ret;
+	}
+
+	ret = ytphy_write_ext(phydev, 0xa00e, 0x1870);
+	if (ret) {
+		return ret;
+	}
+
 err_restore_page:
 	return phy_restore_page(phydev, old_page, ret);
 }

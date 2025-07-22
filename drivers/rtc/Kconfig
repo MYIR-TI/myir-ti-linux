@@ -1768,6 +1768,17 @@ config RTC_DRV_LPC32XX
 	  This driver can also be built as a module. If so, the module
 	  will be called rtc-lpc32xx.
 
+config RTC_DRV_LK8563T
+	tristate "LK LK8563T"
+	depends on OF
+	help
+	  Say Y to enable support for the LK8563T I2C RTC chip. Apart
+	  from the usual rtc functions it provides a clock output of
+	  up to 32kHz.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called rtc-lk8563t.
+
 config RTC_DRV_PM8XXX
 	tristate "Qualcomm PMIC8XXX RTC"
 	depends on MFD_PM8XXX || MFD_SPMI_PMIC || COMPILE_TEST

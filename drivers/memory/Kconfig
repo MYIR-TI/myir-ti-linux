@@ -125,6 +125,14 @@ config OMAP_GPMC_DEBUG
 	  bootloader or else the GPMC timings won't be identical with the
 	  bootloader timings.
 
+config GPMC_BRAM
+	tristate "OMAP SoC GPMC BRAM driver"
+	depends on OF_ADDRESS
+	depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || ARCH_K3 || COMPILE_TEST
+	select GPIOLIB
+	help
+	  This driver is OMAP SoC GPMC BRAM driver.
+
 config TI_EMIF_SRAM
 	tristate "Texas Instruments EMIF SRAM driver"
 	depends on SOC_AM33XX || SOC_AM43XX || (ARM && CPU_V7 && COMPILE_TEST)

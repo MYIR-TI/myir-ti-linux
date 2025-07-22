@@ -196,6 +196,15 @@ config DRM_MICROCHIP_LVDS_SERIALIZER
 	help
 	  Support for Microchip's LVDS serializer.
 
+config DRM_MYIR_MIPI101C
+	tristate "MIPI101C DSI bridge"
+	depends on OF
+	select DRM_MIPI_DSI
+	select DRM_KMS_HELPER
+	select DRM_PANEL_BRIDGE
+	help
+	  MYIR MIPI101C DSI bridge driver.
+
 config DRM_NWL_MIPI_DSI
 	tristate "Northwest Logic MIPI DSI Host controller"
 	depends on DRM
