@@ -894,22 +894,22 @@
 
 			partition@5c0000 {
 				label = "nand.env";
-				reg = <0x5c0000 0x40000>;	/* 256KB */
+				reg = <0x5c0000 0xc00000>;	/* 12MB */
 			};
 
-			partition@600000 {
+			partition@11c0000 {
 				label = "nand.kernel";
-				reg = <0x600000 0x1e00000>;	/* 30MB */
+				reg = <0x11c0000 0x1e00000>;	/* 30MB */
 			};
 
-			partition@2400000 {
+			partition@2fc0000 {
 				label = "nand.dtb";
-				reg = <0x2400000 0x100000>;	/* 1MB */
+				reg = <0x2fc0000 0x100000>;	/* 1MB */
 			};
 
-			partition@2500000 {
+			partition@30c0000 {
 				label = "nand.rootfs";
-				reg = <0x2500000 0x1dac0000>;	/* 474.75MB */
+				reg = <0x30c0000 0x1cf00000>;	/* 463MB */
 			};
 			partition@1ffc0000 {
 				bootph-all;
