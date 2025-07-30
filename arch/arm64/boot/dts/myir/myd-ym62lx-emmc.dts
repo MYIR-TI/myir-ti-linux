@@ -723,6 +723,7 @@
 	clock-frequency = <400000>;
 
 	tps65214: pmic@30 {
+		status = "disabled";
 		compatible = "ti,tps65214";
 		reg = <0x30>;
 		interrupt-parent = <&gic500>;
