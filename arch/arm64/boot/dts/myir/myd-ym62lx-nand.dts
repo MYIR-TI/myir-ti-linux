@@ -180,17 +180,6 @@
 		gpios = <&exp_gpio 1 GPIO_ACTIVE_HIGH>;
 	};
 
-	bridge_reg: bridge-regulator {
-		compatible = "regulator-fixed";
-		regulator-name = "bridge_reg";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		enable-active-high;
-		regulator-always-on;
-		regulator-boot-on;
-		vin-supply = <&vcc_3v3_sys>;
-	};
-
 	rfkill {
 		compatible = "rfkill-gpio";
 		label = "rfkill-bluetooth";
@@ -734,6 +723,7 @@
 	clock-frequency = <400000>;
 
 	tps65214: pmic@30 {
+		status = "disabled";
 		compatible = "ti,tps65214";
 		reg = <0x30>;
 		interrupt-parent = <&gic500>;
@@ -971,7 +961,7 @@
 	bridge@0 {
 		compatible = "myir,mipi101c";
 		reg = <0>;
-		vddc-supply = <&bridge_reg>;
+		vddc-supply = <&vcc_3v3_sys>;
 		ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
