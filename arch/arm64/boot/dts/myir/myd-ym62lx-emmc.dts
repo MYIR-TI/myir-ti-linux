@@ -50,19 +50,6 @@
 		};
 	};
 
-	wkup_keys: wkup-keys {
-		compatible = "gpio-keys";
-		autorepeat;
-		pinctrl-names = "default";
-		pinctrl-0 = <&wkup_button_pins_default>;
-
-		wkup: button-wkup {
-			label = "WKUP Key";
-			linux,code = <KEY_WAKEUP>;
-			gpios = <&wkup_gpio0 6 GPIO_ACTIVE_LOW>;
-		};
-	};
-
 	leds {
 		compatible = "gpio-leds";
 
@@ -627,16 +614,15 @@
 	bootph-all;
 
 	eeprom@50 {
-		compatible = "atmel,24c256";
+		compatible = "atmel,24c32";
 		reg = <0x50>;
 	};
 
-	rtc@51 {
-		compatible = "lk,lk8563t";
-		reg = <0x51>;
+	rtc@32 {
+		compatible = "epson,rx8025t";
+		reg = <0x32>;
 		#clock-cells = <0>;
-		clock-frequency = <32768>;
-		clock-output-names = "lk8563t-clkout";
+		clock-output-names = "rx8025t-clkout";
 	};
 };
 
