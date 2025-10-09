@@ -232,6 +232,13 @@
 };
 
 &main_pmx0 {
+        main_i2c3_pins_default: main-i2c3-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x1d0, PIN_INPUT_PULLUP, 2) /* (A15) UART0_CTSn.I2C3_SCL */
+                        AM62X_IOPAD(0x1d4, PIN_INPUT_PULLUP, 2) /* (B15) UART0_RTSn.I2C3_SDA */
+                >;
+        };
+	
         main_user_key_pins_default: main-user-key-pins-default {
                 pinctrl-single,pins = <
                         AM62X_IOPAD(0x0094, PIN_INPUT, 7) /* (N20) GPMC0_BE1n.GPIO0_36 */
@@ -505,6 +512,20 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c2_pins_default>;
 	clock-frequency = <400000>;
+};
+
+
+&main_i2c3 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_i2c3_pins_default>;
+        clock-frequency = <400000>;
+        status = "okay";
+	rtc: rtc@32 {
+		compatible = "epson,rx8025t";
+		reg = <0x32>;
+		tatus = "okay";
+    };
+
 };
 
 &mcu_i2c0 {
