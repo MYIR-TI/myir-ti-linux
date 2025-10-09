@@ -12,6 +12,10 @@
 #include <linux/phy.h>
 #include <linux/of.h>
 
+#define YT8521_EXTREG_LED0 0xA00C 
+#define YT8521_EXTREG_LED1 0xA00D 
+#define YT8521_EXTREG_LED2 0xA00E
+
 #define PHY_ID_YT8511		0x0000010a
 #define PHY_ID_YT8521		0x0000011a
 #define PHY_ID_YT8531		0x4f51e91b
@@ -1639,6 +1643,32 @@ static int yt8521_resume(struct phy_device *phydev)
 	return yt8521_modify_utp_fiber_bmcr(phydev, BMCR_PDOWN, 0);
 }
 
+static int yt8521_led_init(struct phy_device *phydev)
+{
+    int ret;
+    int val;
+
+    val = ytphy_read_ext(phydev, YT8521_EXTREG_LED1);
+    if (val < 0)
+        return val;
+
+    /* set when link up and speed is 10/100/1000 make led on  as link led */
+    val = 0x180;
+    ret = ytphy_write_ext(phydev, YT8521_EXTREG_LED0, val);
+    if (ret < 0)
+        return ret;
+
+    val = ytphy_read_ext(phydev, YT8521_EXTREG_LED2);
+    if (val < 0)
+        return val;
+
+	/* when rx and tx send or recive msg make led link  as stats led*/
+    val = 0x70;
+
+    ret = ytphy_write_ext(phydev, YT8521_EXTREG_LED2, val);
+
+    return ret;
+}
 /**
  * yt8521_config_init() - called to initialize the PHY
  * @phydev: a pointer to a &struct phy_device
@@ -1651,6 +1681,7 @@ static int yt8521_config_init(struct phy_device *phydev)
 	int old_page;
 	int ret = 0;
 
+	ret = yt8521_led_init(phydev);
 	old_page = phy_select_page(phydev, YT8521_RSSR_UTP_SPACE);
 	if (old_page < 0)
 		goto err_restore_page;

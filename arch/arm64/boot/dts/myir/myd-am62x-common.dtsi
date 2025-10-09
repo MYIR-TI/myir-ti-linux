@@ -550,8 +550,6 @@
 	disable-wp;
 };
 
-/* 简化：禁用网络功能 */
-/*
 &cpsw3g {
 	bootph-all;
 	pinctrl-names = "default";
@@ -560,8 +558,16 @@
 
 &cpsw_port1 {
 	bootph-all;
+	status = "okay";
 	phy-mode = "rgmii-rxid";
 	phy-handle = <&cpsw3g_phy0>;
+};
+
+&cpsw_port2 {
+	bootph-all;
+        phy-mode = "rgmii-rxid";
+        phy-handle = <&cpsw3g_phy1>;
+        status = "okay";
 };
 
 &cpsw3g_mdio {
@@ -571,14 +577,20 @@
 	pinctrl-0 = <&main_mdio1_pins_default>;
 
 	cpsw3g_phy0: ethernet-phy@0 {
-		bootph-all;
-		reg = <0>;
-		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
-		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-		ti,min-output-impedance;
-	};
+                reg = <5>;
+                reset-gpios = <&at9555 5 GPIO_ACTIVE_LOW>;
+                reset-assert-us = <10000>;
+                reset-deassert-us = <20000>;
+        };
+
+        cpsw3g_phy1: ethernet-phy@1 {
+                reg = <1>;
+                reset-gpios = <&at9555 6 GPIO_ACTIVE_LOW>;
+                reset-assert-us = <10000>;
+                reset-deassert-us = <20000>;
+        };
 };
-*/
+
 
 &mailbox0_cluster0 {
 	mbox_m4_0: mbox-m4-0 {
