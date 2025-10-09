@@ -398,6 +398,12 @@
 };
 
 &mcu_pmx0 {
+	 mcu_i2c0_pins_default: mcu-i2c0-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_MCU_IOPAD(0x0044, PIN_INPUT, 0) /* (A8) MCU_I2C0_SCL */
+                        AM62X_MCU_IOPAD(0x0048, PIN_INPUT, 0) /* (D10) MCU_I2C0_SDA */
+                >;
+        };
 	
         mcu_run_led_pins_default: mymcugpio1-pins-default {
                 pinctrl-single,pins = <
@@ -499,6 +505,19 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c2_pins_default>;
 	clock-frequency = <400000>;
+};
+
+&mcu_i2c0 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&mcu_i2c0_pins_default>;
+        clock-frequency = <400000>;
+        status = "okay";
+
+        eeprom: 24c32@50 {
+                compatible = "atmel,24c32";
+                reg = <0x50>;
+                pagesize = <32>;
+        };
 };
 
 &sdhci1 {
