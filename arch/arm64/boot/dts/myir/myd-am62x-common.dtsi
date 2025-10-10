@@ -15,6 +15,8 @@
 		serial0 = &wkup_uart0;
 		serial1 = &mcu_uart0;
 		serial2 = &main_uart0;
+		serial3 = &main_uart4;
+		serial4 = &main_uart6;
 		mmc0 = &sdhci0;
 		mmc1 = &sdhci1;
 		mmc2 = &sdhci2;
@@ -232,6 +234,38 @@
 };
 
 &main_pmx0 {
+	 main_ptn5150_vbus_pins_default: main-ptn5150-vbus-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x254, PIN_OUTPUT, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
+                        AM62X_IOPAD(0x124, PIN_INPUT, 7) /* (A23) MMC2_SDCD.GPIO0_71 */
+
+                >;
+        };
+        main_uart4_pins_default: main-uart4-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x00b0, PIN_INPUT, 3) /* (K22) GPMC0_CSn2.UART4_RXD */
+                        AM62X_IOPAD(0x00b4, PIN_OUTPUT, 3) /* (K24) GPMC0_CSn3.UART4_TXD */
+                >;
+        };
+
+        main_uart4_rst_pins_default: main-uart4-rst-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x0030, PIN_INPUT, 7) /* (G21) OSPI0_CSn1.GPIO0_12 */
+                >;
+        };
+
+        main_uart6_pins_default: main-uart6-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x009c, PIN_INPUT, 3) /* (V25) GPMC0_WAIT1.UART6_RXD */
+                        AM62X_IOPAD(0x00a0, PIN_OUTPUT, 3) /* (K25) GPMC0_WPn.UART6_TXD */
+                >;
+        };
+
+        main_uart6_rst_pins_default: main-uart6-rst-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x0258, PIN_INPUT, 7) /* (F18) USB1_DRVVBUS.GPIO1_51 */
+                >;
+        };
         main_i2c3_pins_default: main-i2c3-pins-default {
                 pinctrl-single,pins = <
                         AM62X_IOPAD(0x1d0, PIN_INPUT_PULLUP, 2) /* (A15) UART0_CTSn.I2C3_SCL */
@@ -279,12 +313,6 @@
 		>;
 	};
 
-	main_i2c2_pins_default: main-i2c2-default-pins {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x0b0, PIN_INPUT_PULLUP, 1) /* (K22/H18) GPMC0_CSn2.I2C2_SCL */
-			AM62X_IOPAD(0x0b4, PIN_INPUT_PULLUP, 1) /* (K24/H19) GPMC0_CSn3.I2C2_SDA */
-		>;
-	};
 
 	main_mmc1_pins_default: main-mmc1-default-pins {
 		bootph-all;
@@ -329,13 +357,6 @@
 			AM62X_IOPAD(0x12c, PIN_OUTPUT, 0) /* (AD19/V15) RGMII1_TX_CTL */
 		>;
 	};
-	/*
-	main_usb1_pins_default: main-usb1-default-pins {
-		pinctrl-single,pins = <
-			AM62X_IOPAD(0x0258, PIN_OUTPUT | PIN_DS_PULLUD_ENABLE | PIN_DS_PULL_UP, 0) 
-		>;
-	};
-*/
 
 	main_mcasp1_pins_default: main-mcasp1-default-pins {
 		pinctrl-single,pins = <
@@ -458,6 +479,27 @@
 	pinctrl-0 = <&main_uart1_pins_default>;
 };
 
+&main_uart4 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_uart4_pins_default &main_uart4_rst_pins_default>;
+  	rts-gpios = <&main_gpio0 12 GPIO_ACTIVE_HIGH>;
+        rs485-rx-during-tx;
+        rs485-rts-delay = <1 1>;
+        linux,rs485-enabled-at-boot-time;
+        status = "okay";
+
+};
+
+&main_uart6 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_uart6_pins_default &main_uart6_rst_pins_default>;
+        rts-gpios = <&main_gpio1 51 GPIO_ACTIVE_HIGH>;
+        rs485-rx-during-tx;
+        rs485-rts-delay = <1 1>;
+        linux,rs485-enabled-at-boot-time;
+        status = "okay";
+};
+
 &main_i2c0 {
 	status = "okay";
 	pinctrl-names = "default";
@@ -508,9 +550,7 @@
 
 
 &main_i2c2 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_i2c2_pins_default>;
+	status = "disabled";
 	clock-frequency = <400000>;
 };
 
@@ -525,6 +565,25 @@
 		reg = <0x32>;
 		tatus = "okay";
     };
+	ptn5150: ptn5150@3d {
+                compatible = "nxp,ptn5150";
+                reg = <0x3d>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&main_ptn5150_vbus_pins_default>;
+                vbus-gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
+                int-gpios = <&main_gpio0 71 IRQ_TYPE_EDGE_FALLING>;
+                status = "okay";
+
+                connector {
+                        compatible = "usb-c-connector";
+                        label = "USB-C";
+                        port {
+                                con_usbotg_hs_ep: endpoint {
+                                        remote-endpoint = <&usbotg_hs_ep>;
+                                };
+                        };
+                };
+        };
 
 };
 
@@ -632,18 +691,26 @@
 	status = "okay";
 	ti,vbus-divider;
 };
-/*
+
 &usb0 {
 	bootph-all;
 	usb-role-switch;
+	address-cells = <1>;
+        #size-cells = <0>;
+        usb-role-switch;
+        dr_mode = "otg";
+        role-switch-default-mode = "host";
+        status = "okay";
 
-	port {
-		usb0_hs_ep: endpoint {
-		    remote-endpoint = <&usb_con_hs>;
-	       };
-	};
+        port@0 {
+                reg = <0>;
+                usbotg_hs_ep: endpoint {
+                        remote-endpoint = <&con_usbotg_hs_ep>;
+                };
+        };
+
 };
-*/
+
 &usb1 {
 	status = "okay";
 	dr_mode = "host";
