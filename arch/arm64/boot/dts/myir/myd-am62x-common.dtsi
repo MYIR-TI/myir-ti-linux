@@ -142,6 +142,25 @@
 		regulator-always-on;
 		regulator-boot-on;
 	};
+	 vcc_1v8: regulator-5 {
+                compatible = "regulator-fixed";
+                regulator-name = "vcc_1v8";
+                regulator-min-microvolt = <1800000>;
+                regulator-max-microvolt = <1800000>;
+                vin-supply = <&vcc_3v3_sys>;
+                regulator-always-on;
+                regulator-boot-on;
+        };
+	  hdmi: connector {
+                compatible = "hdmi-connector";
+                label = "hdmi";
+                type = "a";
+                port {
+                        hdmi_connector_in: endpoint {
+                                remote-endpoint = <&sii9022_out>;
+                        };
+                };
+        };
 
 	leds {
                 compatible = "gpio-leds";
@@ -179,54 +198,6 @@
                 };
         };
 
-	/* 简化：禁用音频和 HDMI 功能 */
-	/*
-	tlv320_mclk: clk-0 {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <12288000>;
-	};
-
-	codec_audio: sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "AM62x-SKEVM";
-		simple-audio-card,widgets =
-			"Headphone",	"Headphone Jack",
-			"Line",		"Line In",
-			"Microphone",	"Microphone Jack";
-		simple-audio-card,routing =
-			"Headphone Jack",	"HPLOUT",
-			"Headphone Jack",	"HPROUT",
-			"LINE1L",		"Line In",
-			"LINE1R",		"Line In",
-			"MIC3R",		"Microphone Jack",
-			"Microphone Jack",	"Mic Bias";
-		simple-audio-card,format = "dsp_b";
-		simple-audio-card,bitclock-master = <&sound_master>;
-		simple-audio-card,frame-master = <&sound_master>;
-		simple-audio-card,bitclock-inversion;
-
-		simple-audio-card,cpu {
-			sound-dai = <&mcasp1>;
-		};
-
-		sound_master: simple-audio-card,codec {
-			sound-dai = <&tlv320aic3106>;
-			clocks = <&tlv320_mclk>;
-		};
-	};
-
-	hdmi0: connector-hdmi {
-		compatible = "hdmi-connector";
-		label = "hdmi";
-		type = "a";
-		port {
-			hdmi_connector_in: endpoint {
-				remote-endpoint = <&sii9022_out>;
-			};
-		};
-	};
-	*/
 };
 
 &phy_gmii_sel {
@@ -511,24 +482,42 @@
 		compatible = "atmel,24c512";
 		reg = <0x51>;
 	};
+	sii9022: sii9022@3b {
+                #sound-dai-cells = <0>;
+                compatible = "sil,sii9022";
+                reg = <0x3b>;
+                status = "okay";
+                iovcc-supply = <&vcc_3v3_sys>;
+                cvcc12-supply = <&vcc_1v8>;
 
-	// typec_pd0: tps6598x@3f {
-	// 	compatible = "ti,tps6598x";
-	// 	reg = <0x3f>;
+                reset-gpios = <&at9555 1 GPIO_ACTIVE_LOW>;
 
-	// 	connector {
-	// 		compatible = "usb-c-connector";
-	// 		label = "USB-C";
-	// 		self-powered;
-	// 		data-role = "dual";
-	// 		power-role = "sink";
-	// 		port {
-	// 			usb_con_hs: endpoint {
-	// 				remote-endpoint = <&usb0_hs_ep>;
-	// 			};
-	// 		};
-	// 	};
-	// };
+
+
+                sil,i2s-data-lanes = < 0 >;
+
+                ports {
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+
+                        port@0 {
+                                reg = <0>;
+
+                                sii9022_in: endpoint {
+                                        remote-endpoint = <&dpi1_out>;
+                                };
+                        };
+
+                        port@1 {
+                                reg = <1>;
+
+                                sii9022_out: endpoint {
+                                        remote-endpoint = <&hdmi_connector_in>;
+                                };
+                        };
+                };
+        };
+
 };
 
 &main_i2c1 {
@@ -717,8 +706,6 @@
 	pinctrl-names = "default";
 };
 
-
-/* 简化：禁用音频和显示功能 */
 /*
 &mcasp1 {
 	status = "okay";
@@ -737,7 +724,7 @@
 	       0 0 0 0
 	>;
 };
-
+*/
 &dss_oldi_io_ctrl {
 	bootph-all;
 };
@@ -759,7 +746,7 @@
 		};
 	};
 };
-*/
+
 
 /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
 &mcu_gpio0 {
