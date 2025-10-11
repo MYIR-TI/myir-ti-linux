@@ -161,6 +161,42 @@
                         };
                 };
         };
+	
+        sgtl5000_mclk: sgtl5000-mclk {
+                compatible = "fixed-clock";
+                #clock-cells = <0>;
+                clock-frequency = <11289600>;
+        };
+	
+	codec_audio: sound {
+                compatible = "simple-audio-card";
+                simple-audio-card,name = "AM62x-SKEVM";
+                simple-audio-card,widgets =
+                                "Microphone", "Microphone Jack",
+                                "Headphone", "Headphone Jack",
+                                "Speaker", "Speaker Ext",
+                                "Line", "Line In Jack";
+                simple-audio-card,routing =
+                                "MIC_IN", "Microphone Jack",
+                                "Microphone Jack", "Mic Bias",
+                                "LINE_IN", "Line In Jack",
+                                "Headphone Jack", "HP_OUT",
+                                "Speaker Ext", "LINE_OUT";
+                simple-audio-card,format = "i2s";
+                simple-audio-card,mclk-fs = <256>;
+                simple-audio-card,bitclock-master = <&sound_master>;
+                simple-audio-card,frame-master = <&sound_master>;
+                simple-audio-card,bitclock-inversion;
+
+                simple-audio-card,cpu {
+                        sound-dai = <&mcasp0>;
+                };
+
+                sound_master: simple-audio-card,codec {
+                        sound-dai = <&sgtl5000>;
+                        clocks = <&sgtl5000_mclk>;
+                };
+        };
 
 	leds {
                 compatible = "gpio-leds";
@@ -328,6 +364,14 @@
 			AM62X_IOPAD(0x12c, PIN_OUTPUT, 0) /* (AD19/V15) RGMII1_TX_CTL */
 		>;
 	};
+        main_mcasp0_pins_default: main-mcasp0-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x01a4, PIN_INPUT, 0) /* (B20) MCASP0_ACLKX.MCASP0_ACLKX */
+                        AM62X_IOPAD(0x01a8, PIN_INPUT, 0) /* (D20) MCASP0_AFSX.MCASP0_AFSX */
+                        AM62X_IOPAD(0x01a0, PIN_OUTPUT, 0) /* (E18) MCASP0_AXR0.MCASP0_AXR0 */
+                        AM62X_IOPAD(0x019c, PIN_INPUT, 0) /* (B18) MCASP0_AXR1.MCASP0_AXR1 */   
+                >;
+        };
 
 	main_mcasp1_pins_default: main-mcasp1-default-pins {
 		pinctrl-single,pins = <
@@ -516,6 +560,18 @@
                                 };
                         };
                 };
+        };
+	    sgtl5000: audio-codec@a {
+                compatible = "fsl,sgtl5000";
+                status = "okay";
+                reg = <0xa>;
+                #sound-dai-cells = <0>;
+                clocks = <&sgtl5000_mclk>;
+                // micbias-resistor-k-ohms = <2>;
+                // micbias-voltage-m-volts = <2250>;
+                VDDA-supply = <&vcc_3v3_sys>;
+                VDDIO-supply = <&vcc_3v3_sys>;
+                VDDD-supply = <&vcc_1v8>;
         };
 
 };
@@ -706,9 +762,27 @@
 	pinctrl-names = "default";
 };
 
-/*
+&mcasp0 {
+        status = "okay";
+        #sound-dai-cells = <0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_mcasp0_pins_default>;
+
+        op-mode = <0>;          /* MCASP_IIS_MODE */
+        tdm-slots = <2>;
+        /* 16 serializers */
+        serial-dir = <  /* 0: INACTIVE, 1: TX, 2: RX */
+               1 2 0 0
+               0 0 0 0
+               0 0 0 0
+               0 0 0 0
+        >;
+        tx-num-evt = <32>;
+        rx-num-evt = <32>;
+};
+
 &mcasp1 {
-	status = "okay";
+	status = "disabled";
 	#sound-dai-cells = <0>;
 
 	pinctrl-names = "default";
@@ -724,7 +798,7 @@
 	       0 0 0 0
 	>;
 };
-*/
+
 &dss_oldi_io_ctrl {
 	bootph-all;
 };
