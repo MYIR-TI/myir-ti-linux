@@ -110,6 +110,19 @@
 		};
 
 	};
+	        lvds_power: regulator-6 {
+                compatible = "regulator-fixed";
+                regulator-name = "lvds_power";
+                regulator-min-microvolt = <3300000>;
+                regulator-max-microvolt = <3300000>;
+                enable-active-high;
+                regulator-always-on;
+                regulator-boot-on;
+                vin-supply = <&vcc_5v0>;
+                pinctrl-names = "default";
+                pinctrl-1 = <&mcu_lvds_power_pins_default>;
+                gpios = <&mcu_gpio0 4 GPIO_ACTIVE_HIGH>;
+        };
 
 	vmain_pd: regulator-0 {
 		/* TPS65988 PD CONTROLLER OUTPUT */
@@ -151,6 +164,8 @@
                 regulator-always-on;
                 regulator-boot-on;
         };
+	
+/*
 	  hdmi: connector {
                 compatible = "hdmi-connector";
                 label = "hdmi";
@@ -161,7 +176,7 @@
                         };
                 };
         };
-	
+*/	
         sgtl5000_mclk: sgtl5000-mclk {
                 compatible = "fixed-clock";
                 #clock-cells = <0>;
@@ -441,6 +456,11 @@
 };
 
 &mcu_pmx0 {
+        mcu_lvds_power_pins_default: mcu-lvds-power-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_MCU_IOPAD(0x0010, PIN_OUTPUT_PULLUP, 7) /* (C9) MCU_SPI0_D1.MCU_GPIO0_4 */
+                >;
+        };
 	 mcu_i2c0_pins_default: mcu-i2c0-pins-default {
                 pinctrl-single,pins = <
                         AM62X_MCU_IOPAD(0x0044, PIN_INPUT, 0) /* (A8) MCU_I2C0_SCL */
@@ -526,6 +546,7 @@
 		compatible = "atmel,24c512";
 		reg = <0x51>;
 	};
+/*
 	sii9022: sii9022@3b {
                 #sound-dai-cells = <0>;
                 compatible = "sil,sii9022";
@@ -561,6 +582,7 @@
                         };
                 };
         };
+*/
 	    sgtl5000: audio-codec@a {
                 compatible = "fsl,sgtl5000";
                 status = "okay";
@@ -580,7 +602,7 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c1_pins_default>;
-	clock-frequency = <100000>;
+	clock-frequency = <400000>;
 	at9555: at9555@20 {
                 compatible = "analogtek,at9555";
                 reg = <0x20>;
@@ -811,21 +833,23 @@
 };
 
 &dss_ports {
-	
+	/*
 	hdmi0_dss: port@1 {
 		reg = <1>;
 
 		dpi1_out: endpoint {
 			remote-endpoint = <&sii9022_in>;
 		};
-	};
+	};*/
 };
 
 
 /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
 &mcu_gpio0 {
  	pinctrl-names ="default";
-        pinctrl-0=< &mcu_run_led_pins_default>;
+        pinctrl-0=< 
+		&mcu_lvds_power_pins_default
+		&mcu_run_led_pins_default>;
         status = "okay";
 };
 
