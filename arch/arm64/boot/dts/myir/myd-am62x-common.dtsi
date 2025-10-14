@@ -165,7 +165,7 @@
                 regulator-boot-on;
         };
 	
-/*
+
 	  hdmi: connector {
                 compatible = "hdmi-connector";
                 label = "hdmi";
@@ -176,11 +176,17 @@
                         };
                 };
         };
-*/	
+	
         sgtl5000_mclk: sgtl5000-mclk {
                 compatible = "fixed-clock";
                 #clock-cells = <0>;
                 clock-frequency = <11289600>;
+        };
+	
+        clk_ov5640_fixed: ov5640-xclk {
+                compatible = "fixed-clock";
+                #clock-cells = <0>;
+                clock-frequency = <12000000>;
         };
 	
 	codec_audio: sound {
@@ -482,6 +488,13 @@
 			AM62X_MCU_IOPAD(0x028, PIN_OUTPUT, 0) /* (C5/C6) WKUP_UART0_TXD */
 		>;
 	};
+
+	mcu_ov5640_gpio_pins_default: mcu-ov5640-gpio-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_MCU_IOPAD(0x0000, PIN_OUTPUT, 7) /* (E8) MCU_SPI0_CS0.MCU_GPIO0_0  RST */
+                        AM62X_MCU_IOPAD(0x0008, PIN_OUTPUT, 7) /* (A7) MCU_SPI0_CLK.MCU_GPIO0_2  PWR */
+                >;
+        };
 };
 
 &cpsw_mac_syscon {
@@ -546,7 +559,7 @@
 		compatible = "atmel,24c512";
 		reg = <0x51>;
 	};
-/*
+
 	sii9022: sii9022@3b {
                 #sound-dai-cells = <0>;
                 compatible = "sil,sii9022";
@@ -582,7 +595,7 @@
                         };
                 };
         };
-*/
+
 	    sgtl5000: audio-codec@a {
                 compatible = "fsl,sgtl5000";
                 status = "okay";
@@ -594,6 +607,26 @@
                 VDDA-supply = <&vcc_3v3_sys>;
                 VDDIO-supply = <&vcc_3v3_sys>;
                 VDDD-supply = <&vcc_1v8>;
+        };
+	ov5640: camera@3c {
+                compatible = "ovti,ov5640";
+                reg = <0x3c>;
+                status = "okay";
+                clocks = <&clk_ov5640_fixed>;
+                clock-names = "xclk";
+                pinctrl-names ="default";
+                pinctrl-0=<&mcu_ov5640_gpio_pins_default>;
+                reset-gpios = <&mcu_gpio0 0 GPIO_ACTIVE_LOW>;
+                powerdown-gpios = <&mcu_gpio0 2 GPIO_ACTIVE_HIGH>;
+
+
+                port {
+                        csi2_cam0: endpoint {
+                                remote-endpoint = <&csi2rx0_in_sensor>;
+                                clock-lanes = <0>;
+                                data-lanes = <1 2>;
+                        };
+                };
         };
 
 };
@@ -717,6 +750,33 @@
         };
 };
 
+&cdns_csi2rx0 {
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		csi0_port0: port@0 {
+			reg = <0>;
+			status = "okay";
+
+			csi2rx0_in_sensor: endpoint {
+				remote-endpoint = <&csi2_cam0>;
+				//bus-type = <4>; /* CSI2 DPHY. */
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+
+&dphy0 {
+	status = "okay";
+};
+
+&ti_csi2rx0 {
+        status = "okay";
+};
 
 &mailbox0_cluster0 {
 	mbox_m4_0: mbox-m4-0 {
@@ -833,14 +893,14 @@
 };
 
 &dss_ports {
-	/*
+	
 	hdmi0_dss: port@1 {
 		reg = <1>;
 
 		dpi1_out: endpoint {
 			remote-endpoint = <&sii9022_in>;
 		};
-	};*/
+	};
 };
 
 
