@@ -110,6 +110,29 @@
 		};
 
 	};
+
+	        vdd_wl_dv: regulator-wl {
+                compatible = "regulator-fixed";
+                regulator-name = "vdd_wl_dv";
+                regulator-min-microvolt = <3300000>;
+                regulator-max-microvolt = <3300000>;
+                regulator-boot-on;
+                enable-active-high;
+                vin-supply = <&vcc_3v3_sys>;
+        };
+
+        wlan_reg_on: regulator-4 {
+                compatible = "regulator-fixed";
+                regulator-name = "wlan_reg_on";
+                regulator-min-microvolt = <3300000>;
+                regulator-max-microvolt = <3300000>;
+                enable-active-high;
+                regulator-boot-on;
+                vin-supply = <&vcc_3v3_sys>;
+                pinctrl-names = "default";
+                pinctrl-1 = <&mcu_wlan_reg_on_pins_default>;
+                gpios = <&mcu_gpio0 15 GPIO_ACTIVE_HIGH>;
+        };
 	        lvds_power: regulator-6 {
                 compatible = "regulator-fixed";
                 regulator-name = "lvds_power";
@@ -262,6 +285,17 @@
 };
 
 &main_pmx0 {
+	     main_mmc2_pins_default: main-mmc2-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x120, PIN_INPUT, 0) /* (C24) MMC2_CMD */
+                        AM62X_IOPAD(0x118, PIN_INPUT, 0) /* (D25) MMC2_CLK */
+                        AM62X_IOPAD(0x114, PIN_INPUT, 0) /* (B24) MMC2_DAT0 */
+                        AM62X_IOPAD(0x110, PIN_INPUT, 0) /* (C25) MMC2_DAT1 */
+                        AM62X_IOPAD(0x10c, PIN_INPUT, 0) /* (E23) MMC2_DAT2 */
+                        AM62X_IOPAD(0x108, PIN_INPUT, 0) /* (D24) MMC2_DAT3 */
+                        AM62X_IOPAD(0x11c, PIN_INPUT, 0) /* (#N/A) MMC2_CLKB */
+                >;
+        };
 	 main_ptn5150_vbus_pins_default: main-ptn5150-vbus-pins-default {
                 pinctrl-single,pins = <
                         AM62X_IOPAD(0x254, PIN_OUTPUT, 7) /* (C20) USB0_DRVVBUS.GPIO1_50 */
@@ -462,6 +496,17 @@
 };
 
 &mcu_pmx0 {
+	mcu_wlan_reg_on_pins_default: mcu-wl-reg-on-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_MCU_IOPAD(0x003c, PIN_OUTPUT_PULLUP, 7) /* (E5) MCU_MCAN1_TX.MCU_GPIO0_15 */
+                >;
+        };
+	    mcu_i2c0_pins_default: mcu-i2c0-pins-default {
+                pinctrl-single,pins = <
+                        AM62X_MCU_IOPAD(0x0044, PIN_INPUT, 0) /* (A8) MCU_I2C0_SCL */
+                        AM62X_MCU_IOPAD(0x0048, PIN_INPUT, 0) /* (D10) MCU_I2C0_SDA */
+                >;
+        };
         mcu_lvds_power_pins_default: mcu-lvds-power-pins-default {
                 pinctrl-single,pins = <
                         AM62X_MCU_IOPAD(0x0010, PIN_OUTPUT_PULLUP, 7) /* (C9) MCU_SPI0_D1.MCU_GPIO0_4 */
@@ -708,6 +753,23 @@
 	pinctrl-0 = <&main_mmc1_pins_default>;
 	disable-wp;
 };
+&sdhci2 {
+        vmmc-supply = <&wlan_reg_on>;
+        vqmmc-supply = <&vdd_wl_dv>;
+        no-1-8-v;
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_mmc2_pins_default>;
+        bus-width = <4>;
+        non-removable;
+        ti,fails-without-test-cd;
+        cap-power-off-card;
+        keep-power-in-suspend;
+        ti,driver-strength-ohm = <50>;
+        disable-wp;
+        assigned-clocks = <&k3_clks 157 158>;
+        assigned-clock-parents = <&k3_clks 157 160>;
+        status = "okay";
+};
 
 &cpsw3g {
 	bootph-all;
@@ -908,6 +970,7 @@
 &mcu_gpio0 {
  	pinctrl-names ="default";
         pinctrl-0=< 
+		&mcu_wlan_reg_on_pins_default
 		&mcu_lvds_power_pins_default
 		&mcu_run_led_pins_default>;
         status = "okay";
