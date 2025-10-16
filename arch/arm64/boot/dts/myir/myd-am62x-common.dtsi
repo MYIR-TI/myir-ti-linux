@@ -567,7 +567,7 @@
 &main_uart1 {
 	/* Main UART1 is used by TIFS firmware */
 	bootph-pre-ram;
-	status = "reserved";
+	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_uart1_pins_default>;
 };
