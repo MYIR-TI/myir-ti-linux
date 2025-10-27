@@ -220,3 +220,13 @@
 		>;
 	status = "okay";
 };
+
+
+//6252 shut down two watchdog
+&main_rti2{
+	status = "disabled";
+};
+
+&main_rti3{
+	status = "disabled";
+};

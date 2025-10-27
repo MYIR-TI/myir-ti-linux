@@ -220,3 +220,31 @@
 		>;
 	status = "okay";
 };
+
+
+
+//6231 shut down tree watchdog pruss and gpu
+&main_rti1{
+	status = "disabled";
+};
+
+&main_rti2{
+	status = "disabled";
+};
+
+&main_rti3{
+	status = "disabled";
+};
+
+&main_rti15{
+	status = "disabled";
+};
+
+&pruss {
+	status = "disabled";
+};
+
+&gpu{
+	status = "disabled";
+};
+
