@@ -13,13 +13,13 @@ thermal_zones: thermal-zones {
 
 		trips {
 			main0_alert: main0-alert {
-				temperature = <95000>;
+				temperature = <120000>;
 				hysteresis = <2000>;
 				type = "passive";
 			};
 
 			main0_crit: main0-crit {
-				temperature = <105000>;	/* milliCelsius */
+				temperature = <120000>;	/* milliCelsius */
 				hysteresis = <2000>;	/* milliCelsius */
 				type = "critical";
 			};
@@ -44,13 +44,13 @@ thermal_zones: thermal-zones {
 
 		trips {
 			main1_alert: main1-alert {
-				temperature = <95000>;
+				temperature = <120000>;
 				hysteresis = <2000>;
 				type = "passive";
 			};
 
 			main1_crit: main1-crit {
-				temperature = <105000>;	/* milliCelsius */
+				temperature = <120000>;	/* milliCelsius */
 				hysteresis = <2000>;	/* milliCelsius */
 				type = "critical";
 			};
