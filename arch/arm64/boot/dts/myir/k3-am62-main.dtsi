@@ -581,10 +581,12 @@
 		mmc-hs200-1_8v;
 		ti,clkbuf-sel = <0x7>;
 		ti,otap-del-sel-legacy = <0x0>;
+		/*
 		ti,otap-del-sel-mmc-hs = <0x0>;
 		ti,otap-del-sel-hs200 = <0x6>;
 		ti,itap-del-sel-legacy = <0x0>;
 		ti,itap-del-sel-mmc-hs = <0x0>;
+		*/
 		status = "disabled";
 	};
 
