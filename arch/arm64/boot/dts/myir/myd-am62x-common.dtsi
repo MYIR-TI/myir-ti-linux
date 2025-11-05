@@ -340,6 +340,12 @@
                         AM62X_IOPAD(0x0094, PIN_INPUT, 7) /* (N20) GPMC0_BE1n.GPIO0_36 */
                 >;
         };
+	main_mcan0_pins_default: main_mcan0_pins_default {
+                pinctrl-single,pins = <
+                        AM62X_IOPAD(0x01d8, PIN_OUTPUT, 0) /* (C15) SoC_UART1_DTRn.MCAN0_TX */
+                        AM62X_IOPAD(0x01dc, PIN_INPUT, 0) /* (E15) SoC_UART1_RIn.MCAN0_RX */
+                >;
+        };
 
 	/* First pad number is ALW package and second is AMC package */
 	main_uart0_pins_default: main-uart0-default-pins {
@@ -544,6 +550,12 @@
 
 &cpsw_mac_syscon {
 	bootph-all;
+};
+
+&main_mcan0 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&main_mcan0_pins_default>;
+        status = "okay";
 };
 
 &wkup_uart0 {
