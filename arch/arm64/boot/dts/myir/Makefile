@@ -9,3 +9,4 @@ dtb-$(CONFIG_ARCH_K3) += myd-am62x-6231.dtb
 dtb-$(CONFIG_ARCH_K3) += myd-am62x-lvds-j5.dtbo
 dtb-$(CONFIG_ARCH_K3) += myd-am62x-lvds-j6.dtbo
 dtb-$(CONFIG_ARCH_K3) += myd-am62x-dual-lvds.dtbo
+dtb-$(CONFIG_ARCH_K3) += myd-am62x-hdmi-audio.dtbo
