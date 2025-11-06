@@ -240,7 +240,7 @@
                 // wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
                 touchscreen-size-x=<1024>;
                 touchscreen-size-y=<600>;
-                status = "okay";
+                status = "disabled";
         };
 };
 
