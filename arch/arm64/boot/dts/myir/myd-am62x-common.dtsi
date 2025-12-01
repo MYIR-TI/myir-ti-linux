@@ -203,7 +203,7 @@
         sgtl5000_mclk: sgtl5000-mclk {
                 compatible = "fixed-clock";
                 #clock-cells = <0>;
-                clock-frequency = <11289600>;
+                clock-frequency = <12288000>;
         };
 	
         clk_ov5640_fixed: ov5640-xclk {
@@ -933,8 +933,8 @@
                0 0 0 0
                0 0 0 0
         >;
-        tx-num-evt = <32>;
-        rx-num-evt = <32>;
+        tx-num-evt = <0>;
+        rx-num-evt = <0>;
 };
 
 &mcasp1 {
