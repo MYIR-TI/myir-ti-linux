@@ -135,6 +135,7 @@
 
 
 &sdhci0 {
+	ti,driver-strength-ohm = <50>;
 	bootph-all;
 	status = "okay";
 	pinctrl-names = "default";
