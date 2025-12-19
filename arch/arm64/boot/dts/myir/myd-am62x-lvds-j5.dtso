@@ -18,7 +18,7 @@
 
         lvds_backlight: lvds_backlight {
                                         compatible = "pwm-backlight";
-                                        pwms = <&epwm0 0 100000 1>;
+                                        pwms = <&epwm0 1 100000 0>;
                                         status = "okay";
                                         pinctrl-names = "default";
                                         brightness-levels = < 0  1  2  3  4  5  6  7  8  9
@@ -128,13 +128,13 @@
 
         epwm0_b_pins_default: epwm0-b-pins-default {
                 pinctrl-single,pins = <
-                        AM62X_IOPAD(0x01b8, PIN_OUTPUT, 7) /* (C13) SPI0_CS1.EHRPWM0_B */
+                        AM62X_IOPAD(0x01b8, PIN_OUTPUT, 2) /* (C13) SPI0_CS1.EHRPWM0_B */
                 >;
         };
 
         epwm0_a_pins_default: epwm0-a-pins-default {
                 pinctrl-single,pins = <
-                        AM62X_IOPAD(0x01b4, PIN_OUTPUT, 7) /* (A13) SPI0_CS0.EHRPWM0_A */
+                        AM62X_IOPAD(0x01b4, PIN_OUTPUT, 2) /* (A13) SPI0_CS0.EHRPWM0_A */
                 >;
         };
 
@@ -219,7 +219,7 @@
 
  &epwm0 {
         pinctrl-names = "default";
-        pinctrl-0 = <&epwm0_b_pins_default>;
+        pinctrl-0 = <&epwm0_a_pins_default &epwm0_b_pins_default>;
         status = "okay";
  };
 
