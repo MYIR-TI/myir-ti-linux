@@ -140,6 +140,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc0_pins_default>;
 	disable-wp;
+	non-removable;
+	mmc-hs200-1_8v;
 };
 
 &sdhci1 {
