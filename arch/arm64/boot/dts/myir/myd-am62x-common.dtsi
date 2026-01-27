@@ -546,6 +546,13 @@
                         AM62X_MCU_IOPAD(0x0008, PIN_OUTPUT, 7) /* (A7) MCU_SPI0_CLK.MCU_GPIO0_2  PWR */
                 >;
         };
+
+	mcu_mcan0_pins_default: mcu-mcan0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_MCU_IOPAD(0x034, PIN_OUTPUT, 0) /* MCU_MCAN0_TX */
+			AM62X_MCU_IOPAD(0x038, PIN_INPUT, 0) /* MCU_MCAN0_RX */
+		>;
+	};
 };
 
 &cpsw_mac_syscon {
@@ -556,6 +563,12 @@
         pinctrl-names = "default";
         pinctrl-0 = <&main_mcan0_pins_default>;
         status = "okay";
+};
+
+&mcu_mcan0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_mcan0_pins_default>;
+	status = "okay";
 };
 
 &wkup_uart0 {
@@ -610,12 +623,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_i2c0_pins_default>;
 	clock-frequency = <400000>;
-
-	eeprom@50 {
-		/* AT24C512C-MAHM-T or M24512-DFMC6TG */
-		compatible = "atmel,24c512";
-		reg = <0x50>;
-	};
 
 	sii9022: sii9022@3b {
                 #sound-dai-cells = <0>;
