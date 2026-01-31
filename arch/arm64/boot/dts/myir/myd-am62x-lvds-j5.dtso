@@ -18,7 +18,7 @@
 
         lvds_backlight: lvds_backlight {
                                         compatible = "pwm-backlight";
-                                        pwms = <&epwm0 1 100000 0>;
+                                        pwms = <&epwm0 0 100000 0>;
                                         status = "okay";
                                         pinctrl-names = "default";
                                         brightness-levels = < 0  1  2  3  4  5  6  7  8  9
@@ -37,12 +37,12 @@
 
 
                                 panel_lvds: panel-lvds {
-                    		compatible = "panel-lvds";
-                   		 backlight = <&lvds_backlight>;
+                                compatible = "panel-lvds";
+                                 backlight = <&lvds_backlight>;
     
                                 width-mm = <154>;
                                 height-mm = <85>;
-                    		data-mapping = "vesa-24";
+                                data-mapping = "vesa-24";
                                 panel-timing {
                                                 clock-frequency = <38000000>;
                                                 hactive = <1024>;
@@ -65,7 +65,7 @@
                                                 #address-cells = <1>;
                                                 #size-cells = <0>;
                                                 port@0 {
-						        reg = <0>;
+                                                        reg = <0>;
                                             
                                                         lcd_in0: endpoint {
                                                                 remote-endpoint = <&oldi_0_out>;
@@ -73,7 +73,7 @@
                                                 };
 
                                                 port@1 {
-							reg = <1>;
+                                                        reg = <1>;
                                                      
                                                         lcd_in1: endpoint {
                                                                 remote-endpoint = <&oldi_1_out>;
@@ -148,50 +148,50 @@
 };
 
 &oldi0 {
-	status = "okay";
-	ti,companion-oldi = <&oldi1>;
+        status = "okay";
+        ti,companion-oldi = <&oldi1>;
 };
 
 &oldi1 {
-	status = "okay";
-	ti,secondary-oldi;
+        status = "okay";
+        ti,secondary-oldi;
 };
 &oldi0_ports {
-	#address-cells = <1>;
-	#size-cells = <0>;
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-	port@0 {
-		reg = <0>;
-		oldi_0_in: endpoint {
-			remote-endpoint = <&dpi0_out0>;
-		};
-	};
+        port@0 {
+                reg = <0>;
+                oldi_0_in: endpoint {
+                        remote-endpoint = <&dpi0_out0>;
+                };
+        };
 
-	port@1 {
-		reg = <1>;
-		oldi_0_out: endpoint {
-			remote-endpoint = <&lcd_in0>;
-		};
-	};
+        port@1 {
+                reg = <1>;
+                oldi_0_out: endpoint {
+                        remote-endpoint = <&lcd_in0>;
+                };
+        };
 };
 
 &oldi1_ports {
-	#address-cells = <1>;
-	#size-cells = <0>;
+        #address-cells = <1>;
+        #size-cells = <0>;
 
-	port@0 {
-		reg = <0>;
-		oldi_1_in: endpoint {
-			remote-endpoint = <&dpi0_out1>;
-		};
-	};
+        port@0 {
+                reg = <0>;
+                oldi_1_in: endpoint {
+                        remote-endpoint = <&dpi0_out1>;
+                };
+        };
 
-	port@1 {
-		reg = <1>;
-		oldi_1_out: endpoint {
-			remote-endpoint = <&lcd_in1>;
-		};
-	};
+        port@1 {
+                reg = <1>;
+                oldi_1_out: endpoint {
+                        remote-endpoint = <&lcd_in1>;
+                };
+        };
 };
 
 &dss_ports {
@@ -219,7 +219,9 @@
 
  &epwm0 {
         pinctrl-names = "default";
-        pinctrl-0 = <&epwm0_a_pins_default &epwm0_b_pins_default>;
+        pinctrl-0 = <
+			&epwm0_a_pins_default
+>;
         status = "okay";
  };
 
@@ -240,7 +242,7 @@
                 // wake-gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
                 touchscreen-size-x=<1024>;
                 touchscreen-size-y=<600>;
-                status = "disabled";
+                status = "okay";
         };
 };
 
